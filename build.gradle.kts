@@ -30,7 +30,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	implementation("org.springframework.boot:spring-boot-starter-jersey")
-	implementation("org.springframework.boot:spring-boot-starter-security")
+	// implementation("org.springframework.boot:spring-boot-starter-security") currently disabled for easier development, for implementation see https://spring.io/guides/tutorials/spring-security-and-angular-js
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.flywaydb:flyway-mysql")
 	compileOnly("org.projectlombok:lombok")
@@ -42,7 +42,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-jersey-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+	// testImplementation("org.springframework.boot:spring-boot-starter-security-test") currently disabled for easier development, for implementation see https://spring.io/guides/tutorials/spring-security-and-angular-js
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
