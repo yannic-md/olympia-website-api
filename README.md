@@ -37,24 +37,29 @@ docker compose down
 - jedes unterpackage von `de.olympia.main` wird automatisch mit den Projekt gestartet, eine Definition in MainApplication ist nicht notwendig
 - die Struktur folgt einer klassischen Layer-Architektur (Controller, Service, Repository, Entity)
 
-2. entity
+2. Flyway
+- Flyway wird verwendet, um die Datenbankmigrationen zu verwalten
+- die skripte zur Erstellung der Db sind unter `src/main/resources/db/migration` zu finden
+- bei jeden start werden die Migrationen automatisch ausgeführt, sofern notwendig
+
+3. entity
 - enthält die JPA-Entities, welche die Datenbanktabellen abbilden
 - im Beispiel wird die Tabelle `countries` durch die Klasse `Country` repräsentiert
 - jede Entity ist mit `@Entity` annotiert, damit Hibernate diese erkennt
 - `@Table(name = "countries")` stellt sicher, dass exakt die bestehende Tabelle verwendet wird
 - Primärschlüssel wird über `@Id` und `@GeneratedValue` definiert
 
-3. repository
+4. repository
 - enthält Interfaces für den Datenbankzugriff
 - `CountryRepository` erweitert `JpaRepository`
 - Standardmethoden wie `findAll`, `findById` oder `save` stehen automatisch zur Verfügung
 
-4. service
+5. service
 - enthält die Geschäftslogik der Anwendung
 - kapselt den Zugriff auf ein oder mehrere Repositories
 - stellt Methoden bereit, die von Controllern verwendet werden
 
-5. controller
+6. controller
 - stellt die REST-Endpunkte der Anwendung bereit
 - ist mit `@RestController` annotiert
 - verarbeitet HTTP-Anfragen und gibt JSON-Antworten zurück
