@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 
 import de.olympia.main.entity.User;
 import de.olympia.main.repository.UserRepository;
-import de.olympia.main.security.LoginRequest;
-import de.olympia.main.security.LoginResponse;
-import de.olympia.main.security.RegisterRequest;
+import de.olympia.main.dto.LoginRequest;
+import de.olympia.main.dto.LoginResponse;
+import de.olympia.main.dto.RegisterRequest;
 
 @Service
 public class AuthService {

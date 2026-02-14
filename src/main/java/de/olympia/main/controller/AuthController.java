@@ -4,9 +4,9 @@ import de.olympia.main.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import de.olympia.main.security.LoginRequest;
-import de.olympia.main.security.LoginResponse;
-import de.olympia.main.security.RegisterRequest;
+import de.olympia.main.dto.LoginRequest;
+import de.olympia.main.dto.LoginResponse;
+import de.olympia.main.dto.RegisterRequest;
 
 @RestController
 @RequestMapping("/api/auth")

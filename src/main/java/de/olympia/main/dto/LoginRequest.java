@@ -1,4 +1,4 @@
-package de.olympia.main.security;
+package de.olympia.main.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
