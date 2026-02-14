@@ -66,7 +66,7 @@ Die Implementierung folgt der klassischen Layer-Architektur:
    - Interface für Datenbankzugriff
    - Methode: `findByUsername(String username)` - findet Benutzer nach Username
 
-5. **security** - DTOs für Request und Response
+5. **dto** - DTOs für Request und Response
    - `LoginRequest.java` - Username und Passwort
    - `RegisterRequest.java` - Username, Passwort und Email
    - `LoginResponse.java` - Response mit Benutzer-Daten
