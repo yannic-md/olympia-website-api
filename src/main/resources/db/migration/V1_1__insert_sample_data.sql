@@ -1,7 +1,7 @@
 INSERT IGNORE INTO users (id, username, password_hash, role, email) VALUES
-(1, 'admin', '$2a$10$adminhashedpasswordhashadmin', 'ADMIN', 'admin@example.com'),
-(2, 'judge1', '$2a$10$judge1hashedpassword', 'JUDGE', 'judge1@example.com'),
-(3, 'judge2', '$2a$10$judge2hashedpassword', 'JUDGE', 'judge2@example.com');
+(1, 'admin', 'adminpwd', 'ADMIN', 'admin@example.com'),
+(2, 'judge1', 'judge1pwd', 'JUDGE', 'judge1@example.com'),
+(3, 'judge2', 'judge2pwd', 'JUDGE', 'judge2@example.com');
 
 INSERT IGNORE INTO countries (id, code, name) VALUES
 (1, 'USA', 'United States'),
