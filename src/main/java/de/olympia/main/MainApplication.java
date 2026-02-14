@@ -11,5 +11,3 @@ public class MainApplication {
 	}
 
 }
-
-// TODO: Remove example package after development is complete
