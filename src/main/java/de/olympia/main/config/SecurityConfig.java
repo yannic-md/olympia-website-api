@@ -16,11 +16,11 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login").permitAll()
                 /*
                 * replace the above line with the following if you want to restrict registration to admins only
                 * ---------------------------------------------------------------------------------------------
-                * .requestMatchers("/api/auth/login").permitAll()
+                * .requestMatchers("/api/auth/login", "/api/auth/admin/login").permitAll()
                 * .requestMatchers("/api/auth/register").hasRole("ADMIN")
                 * */
                 .anyRequest().authenticated()

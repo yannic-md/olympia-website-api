@@ -44,4 +44,19 @@ public class AuthService {
         User savedUser = userRepository.save(user);
         return new LoginResponse(savedUser.getId(), savedUser.getUsername(), savedUser.getRole().toString(), "Registrierung erfolgreich");
     }
+
+    public LoginResponse adminLogin(LoginRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Benutzer nicht gefunden"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Ungültige Anmeldedaten");
+        }
+
+        if (user.getRole() != User.Role.ADMIN) {
+            throw new RuntimeException("Zugriff verweigert: Nur Administratoren können sich hier anmelden");
+        }
+
+        return new LoginResponse(user.getId(), user.getUsername(), user.getRole().toString(), "Admin-Login erfolgreich");
+    }
 }

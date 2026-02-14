@@ -37,4 +37,14 @@ public class AuthController {
             return ResponseEntity.status(400).body(new LoginResponse(null, null, null, e.getMessage()));
         }
     }
+
+    @PostMapping("/admin/login")
+    public ResponseEntity<LoginResponse> adminLogin(@RequestBody LoginRequest request) {
+        try {
+            LoginResponse response = authService.adminLogin(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(new LoginResponse(null, null, null, e.getMessage()));
+        }
+    }
 }
