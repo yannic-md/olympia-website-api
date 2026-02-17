@@ -1,7 +1,7 @@
 INSERT IGNORE INTO users (id, username, password_hash, role, email) VALUES
-(1, 'admin', 'adminpwd', 'ADMIN', 'admin@example.com'),
-(2, 'judge1', 'judge1pwd', 'JUDGE', 'judge1@example.com'),
-(3, 'judge2', 'judge2pwd', 'JUDGE', 'judge2@example.com');
+(1, 'admin', '$2a$12$PHxCrCaCIaKBv8uY8.H4M.OvA0wNY3jjMenKYmZIFrFBTNRZ.p4kO', 'ADMIN', 'admin@example.com'),
+(2, 'judge1', '$2a$12$QwMbgi/l1GL0MCRVwXL/U.0/MfV41FUQesyslrzTXbg3shSBV.y7q', 'JUDGE', 'judge1@example.com'),
+(3, 'judge2', '$2a$12$ZJPS84EyrxU6CNhWWNCok.zFhqU.CR62voW9G08uGkDmwWKDN/reC', 'JUDGE', 'judge2@example.com');
 
 INSERT IGNORE INTO countries (id, code, name) VALUES
 (1, 'USA', 'United States'),

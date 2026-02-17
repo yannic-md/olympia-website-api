@@ -1,4 +1,10 @@
 # olympia-website-api
+## Login Daten
+- Admin: `admin` / `adminpwd`
+- Judge1: `judge1` / `judge1pwd`
+- Judge2: `judge2` / `judge2pwd`
+
+---
 
 ## Erforderliche Software
 - [Openjdk 17](https://openjdk.org/projects/jdk/17/)
