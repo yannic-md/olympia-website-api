@@ -1,9 +1,9 @@
 package de.olympia.main.controller;
 
-import de.olympia.main.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import de.olympia.main.service.AuthService;
 import de.olympia.main.dto.LoginRequest;
 import de.olympia.main.dto.LoginResponse;
 import de.olympia.main.dto.RegisterRequest;

@@ -9,28 +9,35 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "athletes")
+@Table(name = "results")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Athlete {
+public class Result {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150)
-    private String firstName;
-
-    @Column(nullable = false, length = 150)
-    private String lastName;
+    @Column(name = "event_id")
+    private Long eventId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "country_id")
-    private Country country;
+    @JoinColumn(name = "athlete_id", nullable = false)
+    private Athlete athlete;
+
+    @Column(name = "rank")
+    private Integer rank;
+
+    @Column(name = "time_or_points", length = 100)
+    private String timeOrPoints;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 1)
-    private Gender gender;
+    @Column(name = "medal")
+    private Medal medal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -40,8 +47,8 @@ public class Athlete {
         createdAt = LocalDateTime.now();
     }
 
-    public enum Gender {
-        M, F, D
+    public enum Medal {
+        GOLD, SILVER, BRONZE
     }
 }
 

@@ -1,16 +1,18 @@
 package de.olympia.main.controller;
 
-import de.olympia.main.dto.AthleteResponse;
-import de.olympia.main.dto.CreateAthleteRequest;
-import de.olympia.main.dto.UpdateAthleteRequest;
-import de.olympia.main.service.AthleteService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import de.olympia.main.dto.AthleteResponse;
+import de.olympia.main.dto.CreateAthleteRequest;
+import de.olympia.main.dto.UpdateAthleteRequest;
+import de.olympia.main.service.AthleteService;
 
 @RestController
 @RequestMapping("/api/athletes")

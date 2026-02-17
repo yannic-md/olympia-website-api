@@ -1,5 +1,13 @@
 package de.olympia.main.service;
 
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import de.olympia.main.dto.AthleteResponse;
 import de.olympia.main.dto.CreateAthleteRequest;
 import de.olympia.main.dto.UpdateAthleteRequest;
@@ -7,12 +15,6 @@ import de.olympia.main.entity.Athlete;
 import de.olympia.main.entity.Country;
 import de.olympia.main.repository.AthleteRepository;
 import de.olympia.main.repository.CountryRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,11 @@ public class AthleteService {
     private final AthleteRepository athleteRepository;
     private final CountryRepository countryRepository;
 
+    /**
+     * Get all athletes from the database
+     *
+     * @return List of all athletes as AthleteResponse DTOs
+     */
     @Transactional(readOnly = true)
     public List<AthleteResponse> getAllAthletes() {
         return athleteRepository.findAll().stream()
@@ -28,6 +35,13 @@ public class AthleteService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get a specific athlete by ID
+     *
+     * @param id The ID of the athlete to retrieve
+     * @return AthleteResponse DTO with athlete information
+     * @throws RuntimeException if athlete not found
+     */
     @Transactional(readOnly = true)
     public AthleteResponse getAthleteById(Long id) {
         Athlete athlete = athleteRepository.findById(id)
@@ -35,6 +49,14 @@ public class AthleteService {
         return toResponse(athlete);
     }
 
+    /**
+     * Create a new athlete
+     *
+     * @param request CreateAthleteRequest with athlete data (firstName, lastName, countryId, gender)
+     * @return AthleteResponse DTO with created athlete information
+     * @throws IllegalArgumentException if validation fails (missing required fields or invalid gender)
+     * @throws RuntimeException if country not found
+     */
     @Transactional
     public AthleteResponse createAthlete(CreateAthleteRequest request) {
         validateRequest(request.getFirstName(), request.getLastName(), request.getGender());
@@ -57,6 +79,15 @@ public class AthleteService {
         return toResponse(savedAthlete);
     }
 
+    /**
+     * Update an existing athlete (partial update)
+     * Only provided fields will be updated
+     *
+     * @param id The ID of the athlete to update
+     * @param request UpdateAthleteRequest with fields to update
+     * @return AthleteResponse DTO with updated athlete information
+     * @throws RuntimeException if athlete or country not found
+     */
     @Transactional
     public AthleteResponse updateAthlete(Long id, UpdateAthleteRequest request) {
         Athlete athlete = athleteRepository.findById(id)
@@ -84,6 +115,12 @@ public class AthleteService {
         return toResponse(updatedAthlete);
     }
 
+    /**
+     * Delete an athlete by ID
+     *
+     * @param id The ID of the athlete to delete
+     * @throws RuntimeException if athlete not found
+     */
     @Transactional
     public void deleteAthlete(Long id) {
         if (!athleteRepository.existsById(id)) {
@@ -92,6 +129,14 @@ public class AthleteService {
         athleteRepository.deleteById(id);
     }
 
+    /**
+     * Validate athlete request data
+     *
+     * @param firstName First name to validate
+     * @param lastName Last name to validate
+     * @param gender Gender to validate (optional, must be M, F, or D if provided)
+     * @throws IllegalArgumentException if validation fails
+     */
     private void validateRequest(String firstName, String lastName, String gender) {
         if (firstName == null || firstName.trim().isEmpty()) {
             throw new IllegalArgumentException("First name is required");
@@ -108,6 +153,12 @@ public class AthleteService {
         }
     }
 
+    /**
+     * Convert Athlete entity to AthleteResponse DTO
+     *
+     * @param athlete The athlete entity to convert
+     * @return AthleteResponse DTO with athlete information
+     */
     private AthleteResponse toResponse(Athlete athlete) {
         AthleteResponse response = new AthleteResponse();
         response.setId(athlete.getId());

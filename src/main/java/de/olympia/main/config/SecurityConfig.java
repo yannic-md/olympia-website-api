@@ -42,6 +42,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login").permitAll()
+                .requestMatchers("/api/public/**").permitAll() // Public endpoints (no auth required)
                 .requestMatchers("/api/athletes/**", "/api/countries/**").authenticated()
                 /*
                 * replace the above line with the following if you want to restrict registration to admins only

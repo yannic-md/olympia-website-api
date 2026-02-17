@@ -1,16 +1,18 @@
 package de.olympia.main.service;
 
-import de.olympia.main.dto.CountryResponse;
-import de.olympia.main.dto.CreateCountryRequest;
-import de.olympia.main.dto.UpdateCountryRequest;
-import de.olympia.main.entity.Country;
-import de.olympia.main.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import de.olympia.main.dto.CountryResponse;
+import de.olympia.main.dto.CreateCountryRequest;
+import de.olympia.main.dto.UpdateCountryRequest;
+import de.olympia.main.entity.Country;
+import de.olympia.main.repository.CountryRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,11 @@ public class CountryService {
 
     private final CountryRepository countryRepository;
 
+    /**
+     * Get all countries from the database
+     *
+     * @return List of all countries as CountryResponse DTOs
+     */
     @Transactional(readOnly = true)
     public List<CountryResponse> getAllCountries() {
         return countryRepository.findAll().stream()
@@ -25,6 +32,13 @@ public class CountryService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get a specific country by ID
+     *
+     * @param id The ID of the country to retrieve
+     * @return CountryResponse DTO with country information
+     * @throws RuntimeException if country not found
+     */
     @Transactional(readOnly = true)
     public CountryResponse getCountryById(Long id) {
         Country country = countryRepository.findById(id)
@@ -32,6 +46,13 @@ public class CountryService {
         return toResponse(country);
     }
 
+    /**
+     * Create a new country
+     *
+     * @param request CreateCountryRequest with country data (code, name)
+     * @return CountryResponse DTO with created country information
+     * @throws IllegalArgumentException if validation fails or country code already exists
+     */
     @Transactional
     public CountryResponse createCountry(CreateCountryRequest request) {
         validateRequest(request.getCode(), request.getName());
@@ -49,6 +70,16 @@ public class CountryService {
         return toResponse(savedCountry);
     }
 
+    /**
+     * Update an existing country (partial update)
+     * Only provided fields will be updated
+     *
+     * @param id The ID of the country to update
+     * @param request UpdateCountryRequest with fields to update
+     * @return CountryResponse DTO with updated country information
+     * @throws RuntimeException if country not found
+     * @throws IllegalArgumentException if new country code is already in use
+     */
     @Transactional
     public CountryResponse updateCountry(Long id, UpdateCountryRequest request) {
         Country country = countryRepository.findById(id)
@@ -73,6 +104,13 @@ public class CountryService {
         return toResponse(updatedCountry);
     }
 
+    /**
+     * Delete a country by ID
+     * Warning: This will cascade delete all associated athletes
+     *
+     * @param id The ID of the country to delete
+     * @throws RuntimeException if country not found
+     */
     @Transactional
     public void deleteCountry(Long id) {
         if (!countryRepository.existsById(id)) {
@@ -81,6 +119,13 @@ public class CountryService {
         countryRepository.deleteById(id);
     }
 
+    /**
+     * Validate country request data
+     *
+     * @param code Country code to validate (max 8 characters)
+     * @param name Country name to validate (max 150 characters)
+     * @throws IllegalArgumentException if validation fails
+     */
     private void validateRequest(String code, String name) {
         if (code == null || code.trim().isEmpty()) {
             throw new IllegalArgumentException("Country code is required");
@@ -96,6 +141,12 @@ public class CountryService {
         }
     }
 
+    /**
+     * Convert Country entity to CountryResponse DTO
+     *
+     * @param country The country entity to convert
+     * @return CountryResponse DTO with country information
+     */
     private CountryResponse toResponse(Country country) {
         CountryResponse response = new CountryResponse();
         response.setId(country.getId());
@@ -104,4 +155,3 @@ public class CountryService {
         return response;
     }
 }
-
