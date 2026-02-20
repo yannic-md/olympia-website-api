@@ -242,43 +242,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-## Sport Entity Update
-
-### Wichtige Änderung!
-Die API gibt jetzt **Sport-Namen** statt **Event-IDs** zurück:
-
-**Vorher:**
-```json
-{
-  "eventId": 1  // ❌ Magic Number
-}
-```
-
-**Jetzt:**
-```json
-{
-  "sportName": "Swimming"  // ✅ Lesbar!
-}
-```
-
-**Details:** [SportEntity.md](SportEntity.md)
-
----
-
-## Verfügbare Sports
-
-Die Sample-Daten enthalten:
-- `Swimming` (ID: 1)
-- `Athletics` (ID: 2)
-- `Gymnastics` (ID: 3)
-
-Neue Sports können via SQL hinzugefügt werden:
-```sql
-INSERT INTO sports (name) VALUES ('Cycling');
-```
-
----
-
 ## Database Reset
 
 Der Admin kann die Datenbank zurücksetzen:
