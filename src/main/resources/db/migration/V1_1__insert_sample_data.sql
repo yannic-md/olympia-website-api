@@ -13,11 +13,11 @@ INSERT IGNORE INTO sports (id, name) VALUES
 (2, 'Athletics'),
 (3, 'Gymnastics');
 
-INSERT IGNORE INTO athletes (id, first_name, last_name, country_id, gender) VALUES
-(1, 'Katie', 'Ledecky', 1, 'F'),
-(2, 'Caeleb', 'Dressel', 1, 'M'),
-(3, 'Max', 'Mustermann', 2, 'M'),
-(4, 'Claire', 'Dupont', 3, 'F');
+INSERT IGNORE INTO athletes (id, first_name, last_name, country_id) VALUES
+(1, 'Katie', 'Ledecky', 1),
+(2, 'Caeleb', 'Dressel', 1),
+(3, 'Max', 'Mustermann', 2),
+(4, 'Claire', 'Dupont', 3);
 
 INSERT IGNORE INTO results (id, event_id, athlete_id, rank, time_or_points, medal, created_by) VALUES
 (1, NULL, 1, 1, '3:59.34', 'GOLD', 2),

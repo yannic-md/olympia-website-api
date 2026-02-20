@@ -71,10 +71,6 @@ public class AthleteService {
             athlete.setCountry(country);
         }
 
-        if (request.getGender() != null && !request.getGender().isEmpty()) {
-            athlete.setGender(Athlete.Gender.valueOf(request.getGender()));
-        }
-
         Athlete savedAthlete = athleteRepository.save(athlete);
         return toResponse(savedAthlete);
     }
@@ -105,10 +101,6 @@ public class AthleteService {
             Country country = countryRepository.findById(request.getCountryId())
                     .orElseThrow(() -> new RuntimeException("Country not found with id: " + request.getCountryId()));
             athlete.setCountry(country);
-        }
-
-        if (request.getGender() != null && !request.getGender().isEmpty()) {
-            athlete.setGender(Athlete.Gender.valueOf(request.getGender()));
         }
 
         Athlete updatedAthlete = athleteRepository.save(athlete);
@@ -164,7 +156,6 @@ public class AthleteService {
         response.setId(athlete.getId());
         response.setFirstName(athlete.getFirstName());
         response.setLastName(athlete.getLastName());
-        response.setGender(athlete.getGender() != null ? athlete.getGender().name() : null);
         response.setCreatedAt(athlete.getCreatedAt());
 
         if (athlete.getCountry() != null) {

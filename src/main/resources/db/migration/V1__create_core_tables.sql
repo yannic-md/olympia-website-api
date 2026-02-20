@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS athletes (
     first_name VARCHAR(150) NOT NULL,
     last_name VARCHAR(150) NOT NULL,
     country_id BIGINT NULL,
-    gender ENUM('M','F','D') DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_athletes_country FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

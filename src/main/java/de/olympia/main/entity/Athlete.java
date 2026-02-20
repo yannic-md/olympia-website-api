@@ -28,10 +28,6 @@ public class Athlete {
     @JoinColumn(name = "country_id")
     private Country country;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 1)
-    private Gender gender;
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
