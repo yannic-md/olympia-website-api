@@ -10,5 +10,6 @@ import de.olympia.main.entity.Country;
 @Repository
 public interface CountryRepository extends JpaRepository<Country, Long> {
     Optional<Country> findByCode(String code);
+    Optional<Country> findByCodeIgnoreCase(String code);
 }
 
