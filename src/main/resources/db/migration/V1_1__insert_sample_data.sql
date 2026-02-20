@@ -20,10 +20,10 @@ INSERT IGNORE INTO athletes (id, first_name, last_name, country_id) VALUES
 (4, 'Claire', 'Dupont', 3);
 
 INSERT IGNORE INTO results (id, event_id, athlete_id, rank, time_or_points, medal, created_by) VALUES
-(1, NULL, 1, 1, '3:59.34', 'GOLD', 2),
-(2, NULL, 2, 2, '4:01.12', 'SILVER', 2),
-(3, NULL, 3, 1, '9.85', 'GOLD', 3),
-(4, NULL, 4, NULL, '12.34', NULL, 3);
+(1, 1, 1, 1, '3:59.34', 'GOLD', 2),
+(2, 1, 2, 2, '4:01.12', 'SILVER', 2),
+(3, 2, 3, 1, '9.85', 'GOLD', 3),
+(4, 3, 4, NULL, '12.34', NULL, 3);
 
 INSERT IGNORE INTO imports (id, filename, imported_by) VALUES
 (1, 'athletes_import_2026.csv', 2),

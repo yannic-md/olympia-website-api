@@ -16,8 +16,8 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     // Find results by athlete
     List<Result> findByAthleteId(Long athleteId);
 
-    // Find results by event
-    List<Result> findByEventId(Long eventId);
+    // Find results by sport
+    List<Result> findBySportsId(Long sportsId);
 
     // Find all medal winners (medal is not null)
     List<Result> findByMedalIsNotNull();

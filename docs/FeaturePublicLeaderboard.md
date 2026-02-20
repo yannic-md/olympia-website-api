@@ -42,7 +42,7 @@ Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
     "medal": "GOLD",
-    "eventId": null
+    "sportName": "Swimming"
   },
   {
     "resultId": 2,
@@ -52,7 +52,7 @@ Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
     "countryName": "United States",
     "timeOrPoints": "4:01.12",
     "medal": "SILVER",
-    "eventId": null
+    "sportName": "Swimming"
   },
   {
     "resultId": 4,
@@ -62,7 +62,7 @@ Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
     "countryName": "France",
     "timeOrPoints": "12.34",
     "medal": null,
-    "eventId": null
+    "sportName": "Gymnastics"
   }
 ]
 ```
@@ -81,7 +81,7 @@ Content-Type: application/json
 - `countryName` - Vollständiger Ländername
 - `timeOrPoints` - Zeit oder Punkte
 - `medal` - Medaille ("GOLD", "SILVER", "BRONZE" oder null)
-- `eventId` - Event/Disziplin ID (kann null sein)
+- `sportName` - Name der Sportart (z.B. "Swimming", "Athletics", "Gymnastics" oder null)
 
 ---
 
@@ -103,17 +103,17 @@ Gibt nur Ergebnisse mit Medaillen zurück, sortiert nach Medaillen-Typ (Gold →
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
     "medal": "GOLD",
-    "eventId": null
+    "sportName": "Swimming"
   },
   {
     "resultId": 3,
     "rank": 1,
-    "athleteName": "Maximilian Mustermann",
+    "athleteName": "Max Mustermann",
     "countryCode": "GER",
-    "countryName": "Deutschland",
+    "countryName": "Germany",
     "timeOrPoints": "9.85",
     "medal": "GOLD",
-    "eventId": null
+    "sportName": "Athletics"
   },
   {
     "resultId": 2,
@@ -123,7 +123,7 @@ Gibt nur Ergebnisse mit Medaillen zurück, sortiert nach Medaillen-Typ (Gold →
     "countryName": "United States",
     "timeOrPoints": "4:01.12",
     "medal": "SILVER",
-    "eventId": null
+    "sportName": "Swimming"
   }
 ]
 ```
@@ -315,7 +315,7 @@ Dies ermöglicht:
 
 ## Datenbankstruktur
 
-Die Daten kommen aus der `results` Tabelle mit Joins zu `athletes` und `countries`:
+Die Daten kommen aus der `results` Tabelle mit Joins zu `athletes`, `countries` und `sports`:
 
 ```sql
 SELECT 
@@ -323,7 +323,7 @@ SELECT
     r.rank,
     r.time_or_points,
     r.medal,
-    r.event_id,
+    s.name as sport_name,
     a.first_name,
     a.last_name,
     c.code,
@@ -331,5 +331,67 @@ SELECT
 FROM results r
 LEFT JOIN athletes a ON r.athlete_id = a.id
 LEFT JOIN countries c ON a.country_id = c.id
+LEFT JOIN sports s ON r.event_id = s.id
 ORDER BY r.rank ASC NULLS LAST
 ```
+
+---
+
+## Sport-Relationship (Neu!)
+
+### Verbesserung: Keine "Magic Numbers" mehr!
+
+**Vorher:**
+```json
+{
+  "eventId": 1  // Was ist Sport ID 1? 🤔
+}
+```
+
+**Jetzt:**
+```json
+{
+  "sportName": "Swimming"  // Sofort verständlich! ✅
+}
+```
+
+### Technische Details
+
+Die `results` Tabelle hat jetzt eine Foreign Key Beziehung zur `sports` Tabelle:
+
+```sql
+ALTER TABLE results
+ADD CONSTRAINT fk_results_sport
+FOREIGN KEY (event_id) REFERENCES sports(id) ON DELETE CASCADE;
+```
+
+**Vorteile:**
+- ✅ **Keine Magic Numbers** - Sport-Namen sind direkt lesbar
+- ✅ **Type Safety** - Die Beziehung wird auf Entity-Ebene erzwungen
+- ✅ **Referential Integrity** - Foreign Key garantiert gültige Sport-Referenzen
+- ✅ **Bessere API** - Frontend erhält Sport-Namen statt IDs
+- ✅ **Eager Loading** - Sport-Daten werden automatisch mit Results geladen
+
+### Verfügbare Sports
+Die Sample-Daten enthalten folgende Sports:
+- `Swimming` (ID: 1)
+- `Athletics` (ID: 2)
+- `Gymnastics` (ID: 3)
+
+### Entity-Mapping
+```java
+@Entity
+@Table(name = "results")
+public class Result {
+    // ...
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "event_id")
+    private Sport sport;  // Statt: private Long eventId;
+    
+    // ...
+}
+```
+
+Der Spaltenname in der Datenbank bleibt `event_id` für Rückwärtskompatibilität, aber die Anwendung verwendet jetzt die `Sport` Entity.
+

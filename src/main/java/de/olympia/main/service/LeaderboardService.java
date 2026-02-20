@@ -89,15 +89,16 @@ public class LeaderboardService {
         entry.setRank(result.getRank());
         entry.setTimeOrPoints(result.getTimeOrPoints());
         entry.setMedal(result.getMedal() != null ? result.getMedal().name() : null);
-        entry.setEventId(result.getEventId());
 
-        // Athlete information
+        if (result.getSports() != null) {
+            entry.setSportName(result.getSports().getName());
+        }
+
         if (result.getAthlete() != null) {
             entry.setAthleteName(
                 result.getAthlete().getFirstName() + " " + result.getAthlete().getLastName()
             );
 
-            // Country information
             if (result.getAthlete().getCountry() != null) {
                 entry.setCountryCode(result.getAthlete().getCountry().getCode());
                 entry.setCountryName(result.getAthlete().getCountry().getName());

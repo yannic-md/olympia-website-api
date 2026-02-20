@@ -18,8 +18,9 @@ public class Result {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "event_id")
-    private Long eventId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "event_id")
+    private Sports sports;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "athlete_id", nullable = false)

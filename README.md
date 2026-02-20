@@ -1,4 +1,8 @@
 # olympia-website-api
+## Api Documentation
+[API Endpoints Übersicht](docs/API-Overview.md)
+
+
 ## Login Daten
 - Admin: `admin` / `adminpwd`
 - Judge1: `judge1` / `judge1pwd`
