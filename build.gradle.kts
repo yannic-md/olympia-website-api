@@ -32,7 +32,13 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-jersey")
 	// implementation("org.springframework.boot:spring-boot-starter-security") currently disabled for easier development, for implementation see https://spring.io/guides/tutorials/spring-security-and-angular-js
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.flywaydb:flyway-mysql")
+	// Excel/CSV Import
+	implementation("org.apache.poi:poi:5.2.5")
+	implementation("org.apache.poi:poi-ooxml:5.2.5")
+	// CSV parsing
+	implementation("org.apache.commons:commons-csv:1.10.0")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")

@@ -1,14 +1,17 @@
-package de.olympia.main.example.entity;
+package de.olympia.main.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Setter
-@Getter
 @Entity
 @Table(name = "countries")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Country {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,5 +21,5 @@ public class Country {
 
     @Column(nullable = false, length = 150)
     private String name;
-
 }
+
