@@ -341,6 +341,18 @@ public class ExcelImporterService {
                 result.setAthlete(athlete.get());
                 result.setRank(dto.getRank());
                 result.setTimeOrPoints(dto.getTimeOrPoints());
+                if (dto.getScoreType() != null) {
+                    try {
+                        result.setScoreType(Result.ScoreType.valueOf(dto.getScoreType().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        throw new InvalidImportDataException(
+                            "Invalid score type value: " + dto.getScoreType(),
+                            "INVALID_SCORE_TYPE",
+                            rowNum,
+                            "scoreType"
+                        );
+                    }
+                }
                 if (dto.getMedal() != null) {
                     try {
                         result.setMedal(Result.Medal.valueOf(dto.getMedal().toUpperCase()));

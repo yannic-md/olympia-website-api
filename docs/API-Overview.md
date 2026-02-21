@@ -93,6 +93,7 @@ curl -X GET "http://localhost:8080/api/public/leaderboard" | jq
     "countryCode": "USA",
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
+    "scoreType": "TIME",
     "medal": "GOLD",
     "sportName": "Swimming"
   }
@@ -195,6 +196,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     "countryCode": "USA",
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
+    "scoreType": "TIME",
     "medal": "GOLD",
     "sportName": "Swimming"
   }

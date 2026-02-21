@@ -33,6 +33,10 @@ public class Result {
     private String timeOrPoints;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "score_type")
+    private ScoreType scoreType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "medal")
     private Medal medal;
 
@@ -50,6 +54,10 @@ public class Result {
 
     public enum Medal {
         GOLD, SILVER, BRONZE
+    }
+
+    public enum ScoreType {
+        PTS, WINS, TIME
     }
 }
 

@@ -14,6 +14,7 @@ public class LeaderboardEntryResponse {
     private String countryCode;
     private String countryName;
     private String timeOrPoints;
+    private String scoreType;
     private String medal;
     private String sportName;
 }

@@ -22,6 +22,8 @@ public class ResultImportDto {
 
     private String timeOrPoints;
 
+    private String scoreType; // PTS, WINS, TIME
+
     private String medal; // GOLD, SILVER, BRONZE
 }
 

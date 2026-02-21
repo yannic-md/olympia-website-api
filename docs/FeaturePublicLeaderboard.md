@@ -41,6 +41,7 @@ Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
     "countryCode": "USA",
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
+    "scoreType": "TIME",
     "medal": "GOLD",
     "sportName": "Swimming"
   },
@@ -51,6 +52,7 @@ Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
     "countryCode": "USA",
     "countryName": "United States",
     "timeOrPoints": "4:01.12",
+    "scoreType": "TIME",
     "medal": "SILVER",
     "sportName": "Swimming"
   },
@@ -61,6 +63,7 @@ Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
     "countryCode": "FRA",
     "countryName": "France",
     "timeOrPoints": "12.34",
+    "scoreType": "PTS",
     "medal": null,
     "sportName": "Gymnastics"
   }
@@ -80,6 +83,7 @@ Content-Type: application/json
 - `countryCode` - Ländercode (z.B. "USA", "GER")
 - `countryName` - Vollständiger Ländername
 - `timeOrPoints` - Zeit oder Punkte
+- `scoreType` - Typ des Werts in `timeOrPoints` ("PTS", "WINS" oder "TIME")
 - `medal` - Medaille ("GOLD", "SILVER", "BRONZE" oder null)
 - `sportName` - Name der Sportart (z.B. "Swimming", "Athletics", "Gymnastics" oder null)
 
@@ -102,6 +106,7 @@ Gibt nur Ergebnisse mit Medaillen zurück, sortiert nach Medaillen-Typ (Gold →
     "countryCode": "USA",
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
+    "scoreType": "TIME",
     "medal": "GOLD",
     "sportName": "Swimming"
   },
@@ -112,6 +117,7 @@ Gibt nur Ergebnisse mit Medaillen zurück, sortiert nach Medaillen-Typ (Gold →
     "countryCode": "GER",
     "countryName": "Germany",
     "timeOrPoints": "9.85",
+    "scoreType": "TIME",
     "medal": "GOLD",
     "sportName": "Athletics"
   },
@@ -122,6 +128,7 @@ Gibt nur Ergebnisse mit Medaillen zurück, sortiert nach Medaillen-Typ (Gold →
     "countryCode": "USA",
     "countryName": "United States",
     "timeOrPoints": "4:01.12",
+    "scoreType": "TIME",
     "medal": "SILVER",
     "sportName": "Swimming"
   }
@@ -220,6 +227,7 @@ function Leaderboard() {
           <th>Athlet</th>
           <th>Land</th>
           <th>Zeit/Punkte</th>
+          <th>Typ</th>
           <th>Medaille</th>
         </tr>
       </thead>
@@ -230,6 +238,7 @@ function Leaderboard() {
             <td>{result.athleteName}</td>
             <td>{result.countryCode}</td>
             <td>{result.timeOrPoints}</td>
+            <td>{result.scoreType || '-'}</td>
             <td>{result.medal || '-'}</td>
           </tr>
         ))}
@@ -322,6 +331,7 @@ SELECT
     r.id,
     r.rank,
     r.time_or_points,
+    r.score_type,
     r.medal,
     s.name as sport_name,
     a.first_name,

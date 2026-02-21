@@ -126,13 +126,15 @@ public class ExcelParser {
                 String athleteLastName = getCellValueAsString(row.getCell(1), rowNum, "athleteLastName");
                 Integer rank = getCellValueAsInteger(row.getCell(2), rowNum, "rank");
                 String timeOrPoints = row.getCell(3) != null ? row.getCell(3).getStringCellValue() : null;
-                String medal = row.getCell(4) != null ? row.getCell(4).getStringCellValue() : null;
+                String scoreType = row.getCell(4) != null ? row.getCell(4).getStringCellValue() : null;
+                String medal = row.getCell(5) != null ? row.getCell(5).getStringCellValue() : null;
 
                 results.add(new ResultImportDto(
                     athleteFirstName.trim(),
                     athleteLastName.trim(),
                     rank,
                     timeOrPoints != null ? timeOrPoints.trim() : null,
+                    scoreType != null ? scoreType.trim() : null,
                     medal != null ? medal.trim() : null
                 ));
             }

@@ -88,13 +88,15 @@ Importiert Turnier-Ergebnisse aus einer Excel-Datei. Athleten müssen vorher exi
 
 **Excel-Format (Spalten):**
 
-| Spalte A         | Spalte B         | Spalte C | Spalte D     | Spalte E |
-|------------------|------------------|----------|--------------|----------|
-| athleteFirstName | athleteLastName  | rank     | timeOrPoints | medal    |
-| Katie            | Ledecky          | 1        | 3:59.34      | GOLD     |
-| Max              | Mustermann       | 2        | 4:01.12      | SILVER   |
+| Spalte A         | Spalte B         | Spalte C | Spalte D     | Spalte E  | Spalte F |
+|------------------|------------------|----------|--------------|-----------|----------|
+| athleteFirstName | athleteLastName  | rank     | timeOrPoints | scoreType | medal    |
+| Katie            | Ledecky          | 1        | 3:59.34      | TIME      | GOLD     |
+| Max              | Mustermann       | 2        | 4:01.12      | TIME      | SILVER   |
 
 **Medaillen-Werte:** `GOLD`, `SILVER`, `BRONZE` oder leer
+
+**ScoreType-Werte:** `PTS`, `WINS`, `TIME` oder leer
 
 **Response (200 OK):**
 ```json

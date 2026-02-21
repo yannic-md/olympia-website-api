@@ -88,6 +88,7 @@ public class LeaderboardService {
         entry.setResultId(result.getId());
         entry.setRank(result.getRank());
         entry.setTimeOrPoints(result.getTimeOrPoints());
+        entry.setScoreType(result.getScoreType() != null ? result.getScoreType().name() : null);
         entry.setMedal(result.getMedal() != null ? result.getMedal().name() : null);
 
         if (result.getSports() != null) {
