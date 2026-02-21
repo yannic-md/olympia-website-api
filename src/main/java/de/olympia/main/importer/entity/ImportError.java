@@ -23,7 +23,7 @@ public class ImportError {
     @Column(name = "import_log_id", nullable = false)
     private Long importLogId;
 
-    @Column(nullable = false)
+    @Column(name = "`row_number`", nullable = false)
     private Integer rowNumber;
 
     @Column(nullable = false, length = 50)

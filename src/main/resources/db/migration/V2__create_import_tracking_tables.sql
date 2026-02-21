@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS import_logs (
 CREATE TABLE IF NOT EXISTS import_errors (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     import_log_id BIGINT NOT NULL,
-    row_number INT NOT NULL,
+    `row_number` INT NOT NULL,
     error_code VARCHAR(50) NOT NULL,
     error_message TEXT NOT NULL,
     field_name VARCHAR(100) NULL,

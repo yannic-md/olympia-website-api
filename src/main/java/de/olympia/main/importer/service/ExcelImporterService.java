@@ -3,6 +3,7 @@ package de.olympia.main.importer.service;
 import de.olympia.main.entity.Athlete;
 import de.olympia.main.entity.Country;
 import de.olympia.main.entity.Result;
+import de.olympia.main.entity.User;
 import de.olympia.main.importer.dto.AthleteImportDto;
 import de.olympia.main.importer.dto.CountryImportDto;
 import de.olympia.main.importer.dto.ResultImportDto;
@@ -17,6 +18,7 @@ import de.olympia.main.importer.repository.ImportLogRepository;
 import de.olympia.main.repository.AthleteRepository;
 import de.olympia.main.repository.CountryRepository;
 import de.olympia.main.repository.ResultRepository;
+import de.olympia.main.repository.UserRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +44,7 @@ public class ExcelImporterService {
     private final ImportErrorRepository importErrorRepository;
     private final ImportDetailRepository importDetailRepository;
     private final Validator validator;
+    private final UserRepository userRepository;
 
     public ExcelImporterService(
         ExcelParser excelParser,
@@ -52,7 +54,8 @@ public class ExcelImporterService {
         ImportLogRepository importLogRepository,
         ImportErrorRepository importErrorRepository,
         ImportDetailRepository importDetailRepository,
-        Validator validator
+        Validator validator,
+        UserRepository userRepository
     ) {
         this.excelParser = excelParser;
         this.countryRepository = countryRepository;
@@ -62,6 +65,7 @@ public class ExcelImporterService {
         this.importErrorRepository = importErrorRepository;
         this.importDetailRepository = importDetailRepository;
         this.validator = validator;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -240,7 +244,7 @@ public class ExcelImporterService {
                 }
 
                 // Resolve country if provided
-                Long countryId = null;
+                Country countryId = null;
                 if (dto.getCountryCode() != null && !dto.getCountryCode().isEmpty()) {
                     Optional<Country> country = countryRepository.findByCodeIgnoreCase(dto.getCountryCode());
                     if (country.isEmpty()) {
@@ -251,7 +255,7 @@ public class ExcelImporterService {
                             "countryCode"
                         );
                     }
-                    countryId = country.get().getId();
+                    countryId = country.get();
                 }
 
                 // Check if athlete already exists
@@ -268,8 +272,7 @@ public class ExcelImporterService {
                     Athlete athlete = new Athlete();
                     athlete.setFirstName(dto.getFirstName());
                     athlete.setLastName(dto.getLastName());
-                    athlete.setCountryId(countryId);
-                    athlete.setGender(dto.getGender());
+                    athlete.setCountry(countryId);
                     Athlete saved = athleteRepository.save(athlete);
 
                     importLog.setSuccessfulRecords(importLog.getSuccessfulRecords() + 1);
@@ -297,6 +300,18 @@ public class ExcelImporterService {
      */
     private ImportLog processResultsImport(ImportLog importLog, List<ResultImportDto> results, Long userId) {
         int rowNum = 2; // Start from row 2 (after header)
+        final int headerRow = rowNum;
+
+        User createdBy = null;
+        if (userId != null) {
+            createdBy = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidImportDataException(
+                    "User not found: " + userId,
+                    "USER_NOT_FOUND",
+                    headerRow,
+                    "createdBy"
+                ));
+        }
 
         for (ResultImportDto dto : results) {
             try {
@@ -323,7 +338,7 @@ public class ExcelImporterService {
 
                 // Create and save new result
                 Result result = new Result();
-                result.setAthleteId(athlete.get().getId());
+                result.setAthlete(athlete.get());
                 result.setRank(dto.getRank());
                 result.setTimeOrPoints(dto.getTimeOrPoints());
                 if (dto.getMedal() != null) {
@@ -338,7 +353,7 @@ public class ExcelImporterService {
                         );
                     }
                 }
-                result.setCreatedBy(userId);
+                result.setCreatedBy(createdBy);
                 Result saved = resultRepository.save(result);
 
                 importLog.setSuccessfulRecords(importLog.getSuccessfulRecords() + 1);
