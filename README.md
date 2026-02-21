@@ -1,212 +1,153 @@
-# Olympia Website API
+# olympia-website-api
 
-# Schnellstart
+## Login Daten
+- Admin: `admin` / `adminpwd`
+- Judge1: `judge1` / `judge1pwd`
+- Judge2: `judge2` / `judge2pwd`
 
-Die Anwendung kann direkt als JAR-Datei aus den GitHub Releases heruntergeladen werden.
+## Ausführen der Software
+### Voraussetzungen
+- [Openjdk 17](https://winget.run/pkg/Microsoft/OpenJDK.17)
+- [Docker](https://www.docker.com/get-started/)
+- [Node.js](https://nodejs.org/en/download/)
 
-## Voraussetzungen
-- Java 17 oder höher
-- Docker Desktop (Windows) oder Docker (Linux)
-
-### Installation
-
-### Windows (mit Docker Desktop)
+### Windows
 
 <!---
-Windows ist sonnn scheisssssssss wie kann auch nur irgendwer das freiwillig nutzen 
-laueft scheisse und dann nichtmal gut wie absoluter fiebertraum auch nur irgendwas damit zu machen
-- Ich (Yanic) nachdem ich Nils geholfen habe das backend zu starten
+fick dieses Drecks system absoluter fiebertraum auch nur eine sache darauf zum laufen zu kriegen,
+warum nutzt man das freiwillig????????????????????????????
+- Yanic (schwer traumatisiert)
 --->
 
-#### 1. Java 17 installieren
-1. Download: [OpenJDK 17](https://adoptium.net/de/temurin/releases/?version=17)
-2. Installer ausführen und Installation abschließen
-3. Überprüfen:
-```cmd
-java -version
+#### Backend
+- Docker Desktop installieren
+- in der Powershell wsl updaten
+```ps
+  wsl --update
+```
+<br>
+
+- Java 17 installieren
+###### **ein weg mit winget**
+- Powershell starten und folgenden befehl eingeben
+```ps
+  winget install Microsoft.OpenJDK.17
+```
+<br>
+
+- den Github release herunterladen
+[olympia-api-release.zip](https://github.com/yannic-md/olympia-website-api/releases/download/release/olympia-api-release.zip)
+- die zip datei entpacken
+- in das entpackte verzeichnis wechseln
+- die datenbank mit folgendem befehl starten
+```ps
+  docker compose up -d
+```
+- die jar mit folgendem befehl starten
+```ps
+  java -jar olympia-api.jar
 ```
 
-#### 2. WSL 2 aktualisieren
-Öffne PowerShell als Administrator:
-```powershell
-wsl --update
+#### Frontend
+- das Github Projekt klonen
+```ps
+  git clone https://github.com/yannic-md/olympia-website
+```
+- in das Projektverzeichnis wechseln
+- die Powershell dort starten und folgenden befehl eingeben
+```ps
+  docker compose up
 ```
 
-#### 3. Docker Desktop installieren
-1. Download: [Docker Desktop für Windows](https://www.docker.com/products/docker-desktop/)
-2. Installer ausführen
-3. Docker Desktop starten
-4. Warten bis Docker vollständig gestartet ist (Icon in der Taskleiste wird grün)
-
-#### 4. Projekt herunterladen
-1. Gehe zu den [GitHub Releases](https://github.com/YOUR-USERNAME/olympia-website-api/releases)
-2. Lade die neueste `olympia-website-api.jar` herunter
-3. Lade die `compose.yaml` herunter (aus dem Repository oder Release)
-
-#### 5. Anwendung starten
-```cmd
-# Im Ordner mit der JAR und compose.yaml
-docker compose up -d
-java -jar olympia-website-api.jar
-```
+Die Webseite ist unter http://localhost:4200 erreichbar und kommuniziert mit dem Backend unter http://localhost:8080
 
 ---
 
-### Linux (Arch Linux)
+## Dev Documentation
 
-#### 1. Java 17 installieren
+
+### Erforderliche Software
+- [Openjdk 17](https://winget.run/pkg/Microsoft/OpenJDK.17)
+- [Docker](https://www.docker.com/get-started/)
+- [IntelliJ](https://www.jetbrains.com/idea/download/)
+
+### Einrichtung der Entwicklungsumgebung
+1. erstellung einer Run config
+- in der rechten seitenleiste auf das Gradle Symbol klicken (der Elefant)
+- den Punkt main auswählen (notfalls auf das reload icon klicken)
+- dann Tasks und application auswählen
+- auf bootRun klicken
+- IntelliJ sollte das Projekt starten und eine run config erstellt haben
+2. Mariadb Docker Container starten
+ 
+   2.1. Docker Auf Windows
+   - Docker Desktop installieren
+   - in der Powershell wsl updaten
+   ```ps
+     wsl --update
+   ```
+   2.2. Docker Auf Linux
+   ```bash
+     sudo pacman -S docker docker-compose
+   ```
+   ```bash
+     sudo systemctl enable --now docker
+   ```
+   ```bash
+     sudo usermod -aG docker $USER
+   ```
+
+<br>
+
+- der Docker Container starten mit den Programm, siehe schritt 1
+- ist es notwendig nur die Datenbank zu starten
 ```bash
-sudo pacman -S jdk17-openjdk
+docker compose up
 ```
-
-festlegen, dass Java 17 die Standardversion ist:
+- sollte der Container kaputt sein kann dieser mit folgendem Befehl gelöscht werden
 ```bash
-archlinux-java set java-17-openjdk
-```
-
-#### 2. Docker installieren
-```bash
-# Docker und Docker Compose installieren
-sudo pacman -S docker docker-compose
-
-# Docker-Dienst aktivieren und starten
-sudo systemctl enable docker
-sudo systemctl start docker
-
-# Benutzer zur Docker-Gruppe hinzufügen (ohne sudo nutzen zu müssen)
-sudo usermod -aG docker $USER
-
-# Abmelden und neu anmelden, damit Gruppenänderung wirksam wird
-```
-
-Nach erneutem Anmelden testen:
-```bash
-docker --version
-docker compose version
-```
-
-#### 3. Projekt herunterladen
-```bash
-# Erstelle Projektordner
-mkdir olympia-api
-cd olympia-api
-
-# Lade JAR herunter (ersetze VERSION mit aktueller Version)
-wget https://github.com/YOUR-USERNAME/olympia-website-api/releases/download/v1.0.0/olympia-website-api.jar
-
-# Lade compose.yaml herunter
-wget https://raw.githubusercontent.com/YOUR-USERNAME/olympia-website-api/main/compose.yaml
-```
-
-#### 4. Anwendung starten
-```bash
-# Docker Container starten
-docker compose up -d
-
-# Warten bis MariaDB bereit ist (ca. 10-15 Sekunden)
-sleep 15
-
-# JAR ausführen
-java -jar olympia-website-api.jar
-```
----
-
-## Anwendung nutzen
-
-### API ist erreichbar unter:
-```
-http://localhost:8080
-```
-
-### Login-Daten
-- **Admin**: `admin` / `admin123`
-- **Judge1**: `judge1` / `judge1pwd`
-- **Judge2**: `judge2` / `judge2pwd`
-
-### Öffentliche API (keine Anmeldung erforderlich)
-```bash
-# Alle Ergebnisse abrufen
-curl http://localhost:8080/api/public/leaderboard
-
-# Nur Medaillengewinner
-curl http://localhost:8080/api/public/leaderboard/medals
-```
-
-### Admin Login
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "adminpwd"}'
-```
-
----
-
-## Befehle
-
-### Anwendung stoppen
-```bash
-# STRG+C im Terminal wo die JAR läuft
-
-# Docker Container stoppen
 docker compose down
 ```
+3. Mariadb zu IntelliJ hinzufügen
+- in der rechten seitenleiste auf das Datenbank Symbol klicken
+- auf das Plus Symbol klicken
+- auf Data Source und dann auf MariaDB klicken
+- bei Host `0.0.0.0` eintragen
+- bei Port `3306` eintragen
+- bei User `user` eintragen
+- bei Password `secret` eintragen
 
-### Datenbank zurücksetzen
-```bash
-# Container und Daten löschen
-docker compose down -v
+### Erklärung des beispiel Codes
 
-# Container neu starten
-docker compose up -d
+1. Allgemein
+- der Code befindet sich im package `de.olympia.main.example` (in der branch `get-started`)
+- jedes unterpackage von `de.olympia.main` wird automatisch mit den Projekt gestartet, eine Definition in MainApplication ist nicht notwendig
+- die Struktur folgt einer klassischen Layer-Architektur (Controller, Service, Repository, Entity)
 
-# JAR neu starten
-java -jar olympia-website-api.jar
-```
+2. Flyway
+- Flyway wird verwendet, um die Datenbankmigrationen zu verwalten
+- die skripte zur Erstellung der Db sind unter `src/main/resources/db/migration` zu finden
+- bei jeden start werden die Migrationen automatisch ausgeführt, sofern notwendig
 
-### Logs anzeigen
-```bash
-# Docker Logs
-docker compose logs -f mariadb
+3. entity
+- enthält die JPA-Entities, welche die Datenbanktabellen abbilden
+- im Beispiel wird die Tabelle `countries` durch die Klasse `Country` repräsentiert
+- jede Entity ist mit `@Entity` annotiert, damit Hibernate diese erkennt
+- `@Table(name = "countries")` stellt sicher, dass exakt die bestehende Tabelle verwendet wird
+- Primärschlüssel wird über `@Id` und `@GeneratedValue` definiert
 
-# Anwendungs-Logs erscheinen direkt im Terminal
-```
+4. repository
+- enthält Interfaces für den Datenbankzugriff
+- `CountryRepository` erweitert `JpaRepository`
+- Standardmethoden wie `findAll`, `findById` oder `save` stehen automatisch zur Verfügung
 
----
+5. service
+- enthält die Geschäftslogik der Anwendung
+- kapselt den Zugriff auf ein oder mehrere Repositories
+- stellt Methoden bereit, die von Controllern verwendet werden
 
-## Dokumentation
-- [API Endpoints Übersicht](docs/API-Overview.md)
-- [Login & Authentication](docs/FeatureLogin.md)
-- [Athlete Management](docs/FeatureAthleteManagement.md)
-- [Country Management](docs/FeatureCountryManagement.md)
-- [Public Leaderboard API](docs/FeaturePublicLeaderboard.md)
-- [Sport Entity](docs/SportEntity.md)
-
----
-
-## Entwicklung
-
-### Projekt aus Quellcode kompilieren
-```bash
-# Repository klonen
-git clone https://github.com/YOUR-USERNAME/olympia-website-api.git
-cd olympia-website-api
-
-# Ausführen
-./gradlew bootRun
-```
-
-### IntelliJ IDEA Setup
-1. Öffne das Projekt in IntelliJ
-2. Gradle Symbol (Elefant) in der rechten Seitenleiste öffnen
-3. `main` > `Tasks` > `application` > `bootRun` auswählen
-4. Rechtsklick > Run
-
-### Datenbank zu IntelliJ hinzufügen
-1. Database Tool Window öffnen (rechte Seitenleiste)
-2. Plus-Symbol > Data Source > MariaDB
-3. Verbindungsdaten:
-   - **Host**: `localhost`
-   - **Port**: `3306`
-   - **Database**: `olympia`
-   - **User**: `user`
-   - **Password**: `secret`
+6. controller
+- stellt die REST-Endpunkte der Anwendung bereit
+- ist mit `@RestController` annotiert
+- verarbeitet HTTP-Anfragen und gibt JSON-Antworten zurück
+- http://localhost:8080/api/countries liefert eine Liste aller Länder aus der Datenbank
