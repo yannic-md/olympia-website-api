@@ -3,7 +3,31 @@
 ## Übersicht
 Diese öffentliche API bietet Endpunkte zum Abrufen von Turnier-Ergebnissen für die Leaderboard-Tabelle im Frontend. Diese Endpunkte sind **ohne Authentifizierung** zugänglich und können auf der Startseite verwendet werden.
 
-## ⚡ Caching-Strategie
+## Übersetzungen
+
+Die Leaderboard-Endpunkte unterstützen **drei Sprachen** über den Query-Parameter `lang`:
+
+| Parameter | Sprache   | Beispiel                              |
+|-----------|-----------|---------------------------------------|
+| `en`      | Englisch  | `/api/public/leaderboard?lang=en`     |
+| `de`      | Deutsch   | `/api/public/leaderboard?lang=de`     |
+| `fr`      | Französisch | `/api/public/leaderboard?lang=fr`   |
+
+**Standard:** `en` (wenn kein `lang` Parameter angegeben wird)
+
+### Übersetzte Felder
+Die folgenden Felder werden je nach Sprache übersetzt:
+
+| Feld          | EN (Default)    | DE                  | FR                              |
+|---------------|-----------------|---------------------|---------------------------------|
+| `sportName`   | Alpine Skiing   | Ski Alpin           | Ski alpin                       |
+| `countryName` | Germany         | Deutschland         | Allemagne                       |
+| `medal`       | Gold            | Gold                | Or                              |
+| `scoreType`   | Points          | Punkte              | Points                          |
+
+**Nicht übersetzte Felder:** `athleteName`, `countryCode`, `timeOrPoints`, `rank`, `resultId`
+
+## Caching-Strategie
 
 ### Backend-Caching
 - **Spring Cache** (`@Cacheable`) aktiviert
@@ -25,47 +49,64 @@ Durch das zweistufige Caching (Backend + Frontend) wird bei mehrfacher Verwendun
 ## Endpunkte
 
 ### 1. Alle Turnier-Ergebnisse abrufen
-**GET** `/api/public/leaderboard`
+**GET** `/api/public/leaderboard?lang={en|de|fr}`
 
 Gibt alle Ergebnisse aus der Datenbank zurück, sortiert nach Rang.
 
-**Authentifizierung:** ❌ Nicht erforderlich (öffentlich)
+**Authentifizierung:** Nicht erforderlich (öffentlich)
 
-**Response:**
+**Query-Parameter:**
+| Parameter | Typ    | Pflicht | Default | Beschreibung                    |
+|-----------|--------|---------|---------|----------------------------------|
+| `lang`    | String | Nein    | `en`    | Sprache: `en`, `de` oder `fr`   |
+
+**Response (lang=en):**
 ```json
 [
   {
     "resultId": 1,
     "rank": 1,
     "athleteName": "Katie Ledecky",
-    "countryCode": "USA",
+    "countryCode": "us",
     "countryName": "United States",
     "timeOrPoints": "3:59.34",
-    "scoreType": "TIME",
-    "medal": "GOLD",
+    "scoreType": "Time",
+    "medal": "Gold",
     "sportName": "Swimming"
-  },
+  }
+]
+```
+
+**Response (lang=de):**
+```json
+[
   {
-    "resultId": 2,
-    "rank": 2,
-    "athleteName": "Caeleb Dressel",
-    "countryCode": "USA",
-    "countryName": "United States",
-    "timeOrPoints": "4:01.12",
-    "scoreType": "TIME",
-    "medal": "SILVER",
-    "sportName": "Swimming"
-  },
+    "resultId": 1,
+    "rank": 1,
+    "athleteName": "Katie Ledecky",
+    "countryCode": "us",
+    "countryName": "Vereinigte Staaten",
+    "timeOrPoints": "3:59.34",
+    "scoreType": "Zeit",
+    "medal": "Gold",
+    "sportName": "Schwimmen"
+  }
+]
+```
+
+**Response (lang=fr):**
+```json
+[
   {
-    "resultId": 4,
-    "rank": null,
-    "athleteName": "Claire Dupont",
-    "countryCode": "FRA",
-    "countryName": "France",
-    "timeOrPoints": "12.34",
-    "scoreType": "PTS",
-    "medal": null,
-    "sportName": "Gymnastics"
+    "resultId": 1,
+    "rank": 1,
+    "athleteName": "Katie Ledecky",
+    "countryCode": "us",
+    "countryName": "États-Unis",
+    "timeOrPoints": "3:59.34",
+    "scoreType": "Temps",
+    "medal": "Or",
+    "sportName": "Natation"
   }
 ]
 ```
@@ -79,58 +120,63 @@ Content-Type: application/json
 **Felder:**
 - `resultId` - ID des Ergebnisses
 - `rank` - Platzierung (1, 2, 3, ... oder null)
-- `athleteName` - Vollständiger Name des Athleten
-- `countryCode` - Ländercode (z.B. "USA", "GER")
-- `countryName` - Vollständiger Ländername
+- `athleteName` - Vollständiger Name des Athleten (nicht übersetzt)
+- `countryCode` - Ländercode ISO 3166-1 alpha-2 (z.B. "us", "de")
+- `countryName` - Vollständiger Ländername (übersetzt je nach `lang`)
 - `timeOrPoints` - Zeit oder Punkte
-- `scoreType` - Typ des Werts in `timeOrPoints` ("PTS", "WINS" oder "TIME")
-- `medal` - Medaille ("GOLD", "SILVER", "BRONZE" oder null)
-- `sportName` - Name der Sportart (z.B. "Swimming", "Athletics", "Gymnastics" oder null)
+- `scoreType` - Typ des Werts in `timeOrPoints` (übersetzt: "Time"/"Zeit"/"Temps", "Points"/"Punkte"/"Points", "Wins"/"Siege"/"Victoires")
+- `medal` - Medaille (übersetzt: "Gold"/"Gold"/"Or", "Silver"/"Silber"/"Argent", "Bronze"/"Bronze"/"Bronze" oder null)
+- `sportName` - Name der Sportart (übersetzt je nach `lang`, z.B. "Alpine Skiing"/"Ski Alpin"/"Ski alpin")
 
 ---
 
 ### 2. Nur Medaillen-Gewinner abrufen
-**GET** `/api/public/leaderboard/medals`
+**GET** `/api/public/leaderboard/medals?lang={en|de|fr}`
 
 Gibt nur Ergebnisse mit Medaillen zurück, sortiert nach Medaillen-Typ (Gold → Silber → Bronze).
 
-**Authentifizierung:** ❌ Nicht erforderlich (öffentlich)
+**Authentifizierung:** Nicht erforderlich (öffentlich)
 
-**Response:**
+**Query-Parameter:**
+| Parameter | Typ    | Pflicht | Default | Beschreibung                    |
+|-----------|--------|---------|---------|----------------------------------|
+| `lang`    | String | Nein    | `en`    | Sprache: `en`, `de` oder `fr`   |
+
+**Response (lang=de):**
 ```json
 [
   {
     "resultId": 1,
     "rank": 1,
     "athleteName": "Katie Ledecky",
-    "countryCode": "USA",
-    "countryName": "United States",
+    "countryCode": "us",
+    "countryName": "Vereinigte Staaten",
     "timeOrPoints": "3:59.34",
-    "scoreType": "TIME",
-    "medal": "GOLD",
-    "sportName": "Swimming"
+    "scoreType": "Zeit",
+    "medal": "Gold",
+    "sportName": "Schwimmen"
   },
   {
     "resultId": 3,
     "rank": 1,
     "athleteName": "Max Mustermann",
-    "countryCode": "GER",
-    "countryName": "Germany",
+    "countryCode": "de",
+    "countryName": "Deutschland",
     "timeOrPoints": "9.85",
-    "scoreType": "TIME",
-    "medal": "GOLD",
-    "sportName": "Athletics"
+    "scoreType": "Zeit",
+    "medal": "Gold",
+    "sportName": "Leichtathletik"
   },
   {
     "resultId": 2,
     "rank": 2,
     "athleteName": "Caeleb Dressel",
-    "countryCode": "USA",
-    "countryName": "United States",
+    "countryCode": "us",
+    "countryName": "Vereinigte Staaten",
     "timeOrPoints": "4:01.12",
-    "scoreType": "TIME",
-    "medal": "SILVER",
-    "sportName": "Swimming"
+    "scoreType": "Zeit",
+    "medal": "Silber",
+    "sportName": "Schwimmen"
   }
 ]
 ```
@@ -147,108 +193,22 @@ Content-Type: application/json
 
 ### Mit cURL
 ```bash
-# Alle Ergebnisse abrufen
+# Alle Ergebnisse abrufen (Englisch - Standard)
 curl http://localhost:8080/api/public/leaderboard
 
-# Nur Medaillen-Gewinner
-curl http://localhost:8080/api/public/leaderboard/medals
+# Alle Ergebnisse auf Deutsch
+curl http://localhost:8080/api/public/leaderboard?lang=de
+
+# Alle Ergebnisse auf Französisch
+curl http://localhost:8080/api/public/leaderboard?lang=fr
+
+# Nur Medaillen-Gewinner (Deutsch)
+curl http://localhost:8080/api/public/leaderboard/medals?lang=de
 
 # Mit Cache-Control Headers anzeigen
-curl -I http://localhost:8080/api/public/leaderboard
+curl -I http://localhost:8080/api/public/leaderboard?lang=en
 ```
-
-### Mit JavaScript (Frontend)
-```javascript
-// Fetch mit automatischem Browser-Caching
-async function getLeaderboard() {
-  const response = await fetch('http://localhost:8080/api/public/leaderboard');
-  const data = await response.json();
-  return data;
-}
-
-// Nur Medaillen-Gewinner
-async function getMedalWinners() {
-  const response = await fetch('http://localhost:8080/api/public/leaderboard/medals');
-  const data = await response.json();
-  return data;
-}
-
-// Verwendung
-const results = await getLeaderboard();
-console.log(results);
-```
-
-### Mit Axios (Frontend)
-```javascript
-import axios from 'axios';
-
-// Alle Ergebnisse
-const getAllResults = async () => {
-  const { data } = await axios.get('http://localhost:8080/api/public/leaderboard');
-  return data;
-};
-
-// Nur Medaillen
-const getMedals = async () => {
-  const { data } = await axios.get('http://localhost:8080/api/public/leaderboard/medals');
-  return data;
-};
-```
-
----
-
-## Frontend-Integration
-
-### React Beispiel
-```jsx
-import { useEffect, useState } from 'react';
-
-function Leaderboard() {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Dieser Request wird vom Browser gecacht
-    fetch('http://localhost:8080/api/public/leaderboard')
-      .then(res => res.json())
-      .then(data => {
-        setResults(data);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>Rang</th>
-          <th>Athlet</th>
-          <th>Land</th>
-          <th>Zeit/Punkte</th>
-          <th>Typ</th>
-          <th>Medaille</th>
-        </tr>
-      </thead>
-      <tbody>
-        {results.map(result => (
-          <tr key={result.resultId}>
-            <td>{result.rank || '-'}</td>
-            <td>{result.athleteName}</td>
-            <td>{result.countryCode}</td>
-            <td>{result.timeOrPoints}</td>
-            <td>{result.scoreType || '-'}</td>
-            <td>{result.medal || '-'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-```
-
----
+---- 
 
 ## Performance & Caching
 
@@ -300,108 +260,3 @@ Cache-Control: max-age=300, public
    - Dauer: ~20ms
 
 **Resultat:** Nur **EINE** Datenbankabfrage für mehrere Page-Loads! 🚀
-
----
-
-## CORS-Konfiguration
-
-Die API erlaubt Zugriffe von allen Origins:
-```java
-@CrossOrigin(origins = "*")
-```
-
-Dies ermöglicht:
-- ✅ Zugriff vom Frontend (verschiedene Ports während Development)
-- ✅ Zugriff von mobilen Apps
-- ✅ Zugriff von externen Clients
-
-**Für Production:** Passe `origins` an spezifische Domains an:
-```java
-@CrossOrigin(origins = "https://your-frontend-domain.com")
-```
-
----
-
-## Datenbankstruktur
-
-Die Daten kommen aus der `results` Tabelle mit Joins zu `athletes`, `countries` und `sports`:
-
-```sql
-SELECT 
-    r.id,
-    r.rank,
-    r.time_or_points,
-    r.score_type,
-    r.medal,
-    s.name as sport_name,
-    a.first_name,
-    a.last_name,
-    c.code,
-    c.name
-FROM results r
-LEFT JOIN athletes a ON r.athlete_id = a.id
-LEFT JOIN countries c ON a.country_id = c.id
-LEFT JOIN sports s ON r.event_id = s.id
-ORDER BY r.rank ASC NULLS LAST
-```
-
----
-
-## Sport-Relationship (Neu!)
-
-### Verbesserung: Keine "Magic Numbers" mehr!
-
-**Vorher:**
-```json
-{
-  "eventId": 1  // Was ist Sport ID 1? 🤔
-}
-```
-
-**Jetzt:**
-```json
-{
-  "sportName": "Swimming"  // Sofort verständlich! ✅
-}
-```
-
-### Technische Details
-
-Die `results` Tabelle hat jetzt eine Foreign Key Beziehung zur `sports` Tabelle:
-
-```sql
-ALTER TABLE results
-ADD CONSTRAINT fk_results_sport
-FOREIGN KEY (event_id) REFERENCES sports(id) ON DELETE CASCADE;
-```
-
-**Vorteile:**
-- ✅ **Keine Magic Numbers** - Sport-Namen sind direkt lesbar
-- ✅ **Type Safety** - Die Beziehung wird auf Entity-Ebene erzwungen
-- ✅ **Referential Integrity** - Foreign Key garantiert gültige Sport-Referenzen
-- ✅ **Bessere API** - Frontend erhält Sport-Namen statt IDs
-- ✅ **Eager Loading** - Sport-Daten werden automatisch mit Results geladen
-
-### Verfügbare Sports
-Die Sample-Daten enthalten folgende Sports:
-- `Swimming` (ID: 1)
-- `Athletics` (ID: 2)
-- `Gymnastics` (ID: 3)
-
-### Entity-Mapping
-```java
-@Entity
-@Table(name = "results")
-public class Result {
-    // ...
-    
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "event_id")
-    private Sport sport;  // Statt: private Long eventId;
-    
-    // ...
-}
-```
-
-Der Spaltenname in der Datenbank bleibt `event_id` für Rückwärtskompatibilität, aber die Anwendung verwendet jetzt die `Sport` Entity.
-

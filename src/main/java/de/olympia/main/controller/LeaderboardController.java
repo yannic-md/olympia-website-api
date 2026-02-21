@@ -15,7 +15,7 @@ import de.olympia.main.service.LeaderboardService;
 @RestController
 @RequestMapping("/api/public/leaderboard")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Allow all origins for public API
+@CrossOrigin(origins = "*")
 public class LeaderboardController {
 
     private final LeaderboardService leaderboardService;
@@ -24,10 +24,13 @@ public class LeaderboardController {
      * Get all tournament results for the leaderboard
      * Public endpoint - no authentication required
      * Cached on backend and includes Cache-Control headers for frontend caching
+     *
+     * @param lang Language code for translations: "en" (default), "de", "fr"
      */
     @GetMapping
-    public ResponseEntity<List<LeaderboardEntryResponse>> getAllResults() {
-        List<LeaderboardEntryResponse> results = leaderboardService.getAllResults();
+    public ResponseEntity<List<LeaderboardEntryResponse>> getAllResults(
+            @RequestParam(name = "lang", defaultValue = "en") String lang) {
+        List<LeaderboardEntryResponse> results = leaderboardService.getAllResults(lang);
 
         // Add Cache-Control header to enable frontend caching
         // Cache for 5 minutes (300 seconds)
@@ -40,10 +43,13 @@ public class LeaderboardController {
      * Get only medal winners for the leaderboard
      * Public endpoint - no authentication required
      * Cached on backend and includes Cache-Control headers for frontend caching
+     *
+     * @param lang Language code for translations: "en" (default), "de", "fr"
      */
     @GetMapping("/medals")
-    public ResponseEntity<List<LeaderboardEntryResponse>> getMedalWinners() {
-        List<LeaderboardEntryResponse> results = leaderboardService.getMedalWinners();
+    public ResponseEntity<List<LeaderboardEntryResponse>> getMedalWinners(
+            @RequestParam(name = "lang", defaultValue = "en") String lang) {
+        List<LeaderboardEntryResponse> results = leaderboardService.getMedalWinners(lang);
 
         // Add Cache-Control header to enable frontend caching
         // Cache for 5 minutes (300 seconds)

@@ -21,23 +21,26 @@ import de.olympia.main.repository.ResultRepository;
 public class LeaderboardService {
 
     private final ResultRepository resultRepository;
+    private final TranslationService translationService;
 
     /**
      * Get all results for the leaderboard
      * This method is cached to reduce database queries
      * Cache is evicted after 5 minutes or when results are updated
      *
+     * @param lang Language code for translations (en, de, fr). Defaults to en.
      * @return List of all results as LeaderboardEntryResponse DTOs, sorted by rank
      */
-    @Cacheable(value = "leaderboard", key = "'all'")
+    @Cacheable(value = "leaderboard", key = "'all_' + #lang")
     @Transactional(readOnly = true)
-    public List<LeaderboardEntryResponse> getAllResults() {
-        log.info("Fetching all results from database for leaderboard");
+    public List<LeaderboardEntryResponse> getAllResults(String lang) {
+        String normalizedLang = translationService.normalizeLang(lang);
+        log.info("Fetching all results from database for leaderboard (lang={})", normalizedLang);
 
         List<Result> results = resultRepository.findAllByOrderByRankAsc();
 
         return results.stream()
-                .map(this::toLeaderboardEntry)
+                .map(r -> toLeaderboardEntry(r, normalizedLang))
                 .collect(Collectors.toList());
     }
 
@@ -46,19 +49,21 @@ public class LeaderboardService {
      * This method is cached to reduce database queries
      * Sorted by medal type: GOLD -> SILVER -> BRONZE
      *
+     * @param lang Language code for translations (en, de, fr). Defaults to en.
      * @return List of medal winners as LeaderboardEntryResponse DTOs, sorted by medal type
      */
-    @Cacheable(value = "leaderboard", key = "'medals'")
+    @Cacheable(value = "leaderboard", key = "'medals_' + #lang")
     @Transactional(readOnly = true)
-    public List<LeaderboardEntryResponse> getMedalWinners() {
-        log.info("Fetching medal winners from database for leaderboard");
+    public List<LeaderboardEntryResponse> getMedalWinners(String lang) {
+        String normalizedLang = translationService.normalizeLang(lang);
+        log.info("Fetching medal winners from database for leaderboard (lang={})", normalizedLang);
 
         List<Result> results = resultRepository.findByMedalIsNotNull();
 
         // Sort by medal type: GOLD (1), SILVER (2), BRONZE (3)
         return results.stream()
                 .sorted(Comparator.comparing(r -> getMedalSortOrder(r.getMedal())))
-                .map(this::toLeaderboardEntry)
+                .map(r -> toLeaderboardEntry(r, normalizedLang))
                 .collect(Collectors.toList());
     }
 
@@ -81,18 +86,21 @@ public class LeaderboardService {
      * Convert Result entity to LeaderboardEntryResponse DTO
      *
      * @param result The result entity to convert
-     * @return LeaderboardEntryResponse DTO with result, athlete, and country information
+     * @param lang   The language code for translations
+     * @return LeaderboardEntryResponse DTO with translated result, athlete, and country information
      */
-    private LeaderboardEntryResponse toLeaderboardEntry(Result result) {
+    private LeaderboardEntryResponse toLeaderboardEntry(Result result, String lang) {
         LeaderboardEntryResponse entry = new LeaderboardEntryResponse();
         entry.setResultId(result.getId());
         entry.setRank(result.getRank());
         entry.setTimeOrPoints(result.getTimeOrPoints());
-        entry.setScoreType(result.getScoreType() != null ? result.getScoreType().name() : null);
-        entry.setMedal(result.getMedal() != null ? result.getMedal().name() : null);
+        entry.setScoreType(result.getScoreType() != null
+                ? translationService.translateScoreType(result.getScoreType().name(), lang) : null);
+        entry.setMedal(result.getMedal() != null
+                ? translationService.translateMedal(result.getMedal().name(), lang) : null);
 
         if (result.getSports() != null) {
-            entry.setSportName(result.getSports().getName());
+            entry.setSportName(translationService.translateSport(result.getSports().getName(), lang));
         }
 
         if (result.getAthlete() != null) {
@@ -102,7 +110,8 @@ public class LeaderboardService {
 
             if (result.getAthlete().getCountry() != null) {
                 entry.setCountryCode(result.getAthlete().getCountry().getCode());
-                entry.setCountryName(result.getAthlete().getCountry().getName());
+                entry.setCountryName(translationService.translateCountry(
+                        result.getAthlete().getCountry().getName(), lang));
             }
         }
 

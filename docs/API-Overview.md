@@ -5,8 +5,11 @@ Diese Datei bietet eine schnelle Übersicht über alle verfügbaren API-Endpunkt
 ## Public Endpoints (Keine Authentifizierung erforderlich)
 
 ### Leaderboard
-- `GET /api/public/leaderboard` - Alle Turnier-Ergebnisse mit Sport-Namen
-- `GET /api/public/leaderboard/medals` - Nur Medaillengewinner
+- `GET /api/public/leaderboard?lang={en|de|fr}` - Alle Turnier-Ergebnisse mit Sport-Namen
+- `GET /api/public/leaderboard/medals?lang={en|de|fr}` - Nur Medaillengewinner
+
+**Übersetzungen:** Query-Parameter `lang` unterstützt `en` (Standard), `de`, `fr`.
+Übersetzt werden: `sportName`, `countryName`, `medal`, `scoreType`.
 
 **Dokumentation:** [FeaturePublicLeaderboard.md](FeaturePublicLeaderboard.md)
 
@@ -80,22 +83,46 @@ curl -X POST "http://localhost:8080/api/auth/login" \
 
 ### 2. Public Leaderboard abrufen (keine Auth)
 ```bash
+# Englisch (Standard)
 curl -X GET "http://localhost:8080/api/public/leaderboard" | jq
+
+# Deutsch
+curl -X GET "http://localhost:8080/api/public/leaderboard?lang=de" | jq
+
+# Französisch
+curl -X GET "http://localhost:8080/api/public/leaderboard?lang=fr" | jq
 ```
 
-**Response:**
+**Response (lang=en):**
 ```json
 [
   {
     "resultId": 1,
     "rank": 1,
-    "athleteName": "Katie Ledecky",
-    "countryCode": "USA",
-    "countryName": "United States",
-    "timeOrPoints": "3:59.34",
-    "scoreType": "TIME",
-    "medal": "GOLD",
-    "sportName": "Swimming"
+    "athleteName": "Sofia Goggia",
+    "countryCode": "it",
+    "countryName": "Italy",
+    "timeOrPoints": "1:32.03",
+    "scoreType": "Time",
+    "medal": "Gold",
+    "sportName": "Alpine Skiing"
+  }
+]
+```
+
+**Response (lang=de):**
+```json
+[
+  {
+    "resultId": 1,
+    "rank": 1,
+    "athleteName": "Sofia Goggia",
+    "countryCode": "it",
+    "countryName": "Italien",
+    "timeOrPoints": "1:32.03",
+    "scoreType": "Zeit",
+    "medal": "Gold",
+    "sportName": "Ski Alpin"
   }
 ]
 ```
@@ -186,19 +213,19 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ]
 ```
 
-#### GET /api/public/leaderboard
+#### GET /api/public/leaderboard?lang=de
 ```json
 [
   {
     "resultId": 1,
     "rank": 1,
-    "athleteName": "Katie Ledecky",
-    "countryCode": "USA",
-    "countryName": "United States",
-    "timeOrPoints": "3:59.34",
-    "scoreType": "TIME",
-    "medal": "GOLD",
-    "sportName": "Swimming"
+    "athleteName": "Sofia Goggia",
+    "countryCode": "it",
+    "countryName": "Italien",
+    "timeOrPoints": "1:32.03",
+    "scoreType": "Zeit",
+    "medal": "Gold",
+    "sportName": "Ski Alpin"
   }
 ]
 ```
@@ -261,6 +288,45 @@ curl -X POST "http://localhost:8080/api/admin/reset" \
 ```
 
 **Hinweis:** Nur der Admin-User bleibt erhalten, alle anderen Daten werden gelöscht!
+
+---
+
+## Translation
+
+Die Leaderboard-Endpunkte unterstützen **Englisch**, **Deutsch** und **Französisch**.
+
+### Verwendung
+```bash
+# Standard (Englisch)
+curl http://localhost:8080/api/public/leaderboard
+
+# Deutsch
+curl http://localhost:8080/api/public/leaderboard?lang=de
+
+# Französisch
+curl http://localhost:8080/api/public/leaderboard?lang=fr
+```
+
+### Übersetzte Felder
+
+| Feld          | EN (Default)    | DE                  | FR                              |
+|---------------|-----------------|---------------------|---------------------------------|
+| `sportName`   | Alpine Skiing   | Ski Alpin           | Ski alpin                       |
+| `countryName` | Germany         | Deutschland         | Allemagne                       |
+| `medal`       | Gold / Silver / Bronze | Gold / Silber / Bronze | Or / Argent / Bronze     |
+| `scoreType`   | Time / Points / Wins | Zeit / Punkte / Siege | Temps / Points / Victoires |
+
+### Nicht übersetzte Felder
+- `athleteName` – Name bleibt unverändert
+- `countryCode` – ISO-Code bleibt unverändert
+- `timeOrPoints` – Rohwert bleibt unverändert
+- `rank`, `resultId` – numerische Werte
+
+### Technische Details
+- **Service:** `TranslationService` mit statischen Übersetzungs-Maps
+- **Fallback:** Unbekannte Werte werden unverändert zurückgegeben
+- **Caching:** Cache-Keys sind sprachabhängig (`all_en`, `all_de`, `medals_fr`, etc.)
+- **Default:** `en` wenn kein `lang` Parameter angegeben oder ungültiger Wert
 
 ---
 
