@@ -94,10 +94,8 @@ public class LeaderboardService {
         entry.setResultId(result.getId());
         entry.setRank(result.getRank());
         entry.setTimeOrPoints(result.getTimeOrPoints());
-        entry.setScoreType(result.getScoreType() != null
-                ? translationService.translateScoreType(result.getScoreType().name(), lang) : null);
-        entry.setMedal(result.getMedal() != null
-                ? translationService.translateMedal(result.getMedal().name(), lang) : null);
+        entry.setScoreType(result.getScoreType() != null ? result.getScoreType().name().toUpperCase() : null);
+        entry.setMedal(result.getMedal() != null ? result.getMedal().name().toUpperCase() : null);
 
         if (result.getSports() != null) {
             entry.setSportName(translationService.translateSport(result.getSports().getName(), lang));
