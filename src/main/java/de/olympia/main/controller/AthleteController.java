@@ -16,6 +16,7 @@ import de.olympia.main.service.AthleteService;
 
 @RestController
 @RequestMapping("/api/athletes")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class AthleteController {
 
