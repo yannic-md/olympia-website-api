@@ -2,6 +2,7 @@ package de.olympia.main.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,14 +12,19 @@ import java.util.stream.Collectors;
 import de.olympia.main.dto.CountryResponse;
 import de.olympia.main.dto.CreateCountryRequest;
 import de.olympia.main.dto.UpdateCountryRequest;
+import de.olympia.main.entity.Athlete;
 import de.olympia.main.entity.Country;
+import de.olympia.main.repository.AthleteRepository;
 import de.olympia.main.repository.CountryRepository;
+import de.olympia.main.repository.ResultRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private final AthleteRepository athleteRepository;
+    private final ResultRepository resultRepository;
 
     /**
      * Get all countries from the database
@@ -53,6 +59,7 @@ public class CountryService {
      * @return CountryResponse DTO with created country information
      * @throws IllegalArgumentException if validation fails or country code already exists
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public CountryResponse createCountry(CreateCountryRequest request) {
         validateRequest(request.getCode(), request.getName());
@@ -80,6 +87,7 @@ public class CountryService {
      * @throws RuntimeException if country not found
      * @throws IllegalArgumentException if new country code is already in use
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public CountryResponse updateCountry(Long id, UpdateCountryRequest request) {
         Country country = countryRepository.findById(id)
@@ -106,16 +114,28 @@ public class CountryService {
 
     /**
      * Delete a country by ID
-     * Warning: This will cascade delete all associated athletes
+     * This will also delete all results for athletes of that country,
+     * then cascade delete all associated athletes
      *
      * @param id The ID of the country to delete
      * @throws RuntimeException if country not found
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public void deleteCountry(Long id) {
         if (!countryRepository.existsById(id)) {
             throw new RuntimeException("Country not found with id: " + id);
         }
+
+        // Delete all results for athletes belonging to this country
+        List<Athlete> athletes = athleteRepository.findByCountryId(id);
+        for (Athlete athlete : athletes) {
+            resultRepository.deleteAll(resultRepository.findByAthleteId(athlete.getId()));
+        }
+
+        // Delete all athletes of this country
+        athleteRepository.deleteAll(athletes);
+
         countryRepository.deleteById(id);
     }
 

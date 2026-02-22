@@ -2,6 +2,7 @@ package de.olympia.main.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +58,7 @@ public class AthleteService {
      * @throws IllegalArgumentException if validation fails (missing required fields or invalid gender)
      * @throws RuntimeException if country not found
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public AthleteResponse createAthlete(CreateAthleteRequest request) {
         validateRequest(request.getFirstName(), request.getLastName(), request.getGender());
@@ -84,6 +86,7 @@ public class AthleteService {
      * @return AthleteResponse DTO with updated athlete information
      * @throws RuntimeException if athlete or country not found
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public AthleteResponse updateAthlete(Long id, UpdateAthleteRequest request) {
         Athlete athlete = athleteRepository.findById(id)
@@ -113,6 +116,7 @@ public class AthleteService {
      * @param id The ID of the athlete to delete
      * @throws RuntimeException if athlete not found
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public void deleteAthlete(Long id) {
         if (!athleteRepository.existsById(id)) {
