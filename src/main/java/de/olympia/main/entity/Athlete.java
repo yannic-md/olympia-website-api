@@ -28,16 +28,20 @@ public class Athlete {
     @JoinColumn(name = "country_id")
     private Country country;
 
+    /** Derived from results — not stored in the athletes table. */
+    @Transient
+    private String sport;
+
+    /** Derived from results — not stored in the athletes table. */
+    @Transient
+    private Result.ScoreType scoreType;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    public enum Gender {
-        M, F, D
     }
 }
 

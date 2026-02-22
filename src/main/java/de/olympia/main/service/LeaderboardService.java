@@ -94,21 +94,22 @@ public class LeaderboardService {
         entry.setResultId(result.getId());
         entry.setRank(result.getRank());
         entry.setTimeOrPoints(result.getTimeOrPoints());
-        entry.setScoreType(result.getScoreType() != null
-                ? translationService.translateScoreType(result.getScoreType().name(), lang) : null);
-        entry.setMedal(result.getMedal() != null
-                ? translationService.translateMedal(result.getMedal().name(), lang) : null);
+        entry.setScoreType(result.getScoreType() != null ? result.getScoreType().name().toUpperCase() : null);
+        entry.setMedal(result.getMedal() != null ? result.getMedal().name().toUpperCase() : null);
 
         if (result.getSports() != null) {
             entry.setSportName(translationService.translateSport(result.getSports().getName(), lang));
+            entry.setSportRawName(result.getSports().getName());
         }
 
         if (result.getAthlete() != null) {
+            entry.setAthleteId(result.getAthlete().getId());
             entry.setAthleteName(
                 result.getAthlete().getFirstName() + " " + result.getAthlete().getLastName()
             );
 
             if (result.getAthlete().getCountry() != null) {
+                entry.setCountryId(result.getAthlete().getCountry().getId());
                 entry.setCountryCode(result.getAthlete().getCountry().getCode());
                 entry.setCountryName(translationService.translateCountry(
                         result.getAthlete().getCountry().getName(), lang));

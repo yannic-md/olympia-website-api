@@ -16,7 +16,6 @@ import de.olympia.main.service.CountryService;
 
 @RestController
 @RequestMapping("/api/countries")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class CountryController {
 

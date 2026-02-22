@@ -2,6 +2,7 @@ package de.olympia.main.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class AdminService {
      *
      * @throws RuntimeException if the reset operation fails
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public void resetDatabase() {
         try {

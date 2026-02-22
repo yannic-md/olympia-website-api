@@ -22,6 +22,7 @@ import de.olympia.main.repository.UserRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,6 +72,7 @@ public class ExcelImporterService {
     /**
      * Import countries from Excel file
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public ImportLog importCountries(MultipartFile file, Long userId) {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "COUNTRIES", userId);
@@ -106,6 +108,7 @@ public class ExcelImporterService {
     /**
      * Import athletes from Excel file
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public ImportLog importAthletes(MultipartFile file, Long userId) {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "ATHLETES", userId);
@@ -141,6 +144,7 @@ public class ExcelImporterService {
     /**
      * Import results from Excel file
      */
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public ImportLog importResults(MultipartFile file, Long userId) {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "RESULTS", userId);
