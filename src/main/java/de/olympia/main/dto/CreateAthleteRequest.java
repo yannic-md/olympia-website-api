@@ -1,5 +1,6 @@
 package de.olympia.main.dto;
 
+import de.olympia.main.entity.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,11 @@ public class CreateAthleteRequest {
     private String firstName;
     private String lastName;
     private Long countryId;
-    private String gender; // "M", "F", or "D"
+    private Integer goldMedals;
+    private Integer silverMedals;
+    private Integer bronzeMedals;
+    private String bestTime;
+    private String sport;
+    private Result.ScoreType scoreType;
 }
 

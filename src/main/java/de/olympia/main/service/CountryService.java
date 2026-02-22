@@ -2,8 +2,11 @@ package de.olympia.main.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,14 +14,20 @@ import java.util.stream.Collectors;
 import de.olympia.main.dto.CountryResponse;
 import de.olympia.main.dto.CreateCountryRequest;
 import de.olympia.main.dto.UpdateCountryRequest;
+import de.olympia.main.entity.Athlete;
 import de.olympia.main.entity.Country;
+import de.olympia.main.repository.AthleteRepository;
 import de.olympia.main.repository.CountryRepository;
+import de.olympia.main.repository.ResultRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private final AthleteRepository athleteRepository;
+    private final ResultRepository resultRepository;
+    private final CacheManager cacheManager;
 
     /**
      * Get all countries from the database
@@ -67,6 +76,7 @@ public class CountryService {
         country.setName(request.getName());
 
         Country savedCountry = countryRepository.save(country);
+        evictLeaderboardCacheAfterCommit();
         return toResponse(savedCountry);
     }
 
@@ -101,12 +111,14 @@ public class CountryService {
         }
 
         Country updatedCountry = countryRepository.save(country);
+        evictLeaderboardCacheAfterCommit();
         return toResponse(updatedCountry);
     }
 
     /**
      * Delete a country by ID
-     * Warning: This will cascade delete all associated athletes
+     * This will also delete all results for athletes of that country,
+     * then cascade delete all associated athletes
      *
      * @param id The ID of the country to delete
      * @throws RuntimeException if country not found
@@ -116,7 +128,18 @@ public class CountryService {
         if (!countryRepository.existsById(id)) {
             throw new RuntimeException("Country not found with id: " + id);
         }
+
+        // Delete all results for athletes belonging to this country
+        List<Athlete> athletes = athleteRepository.findByCountryId(id);
+        for (Athlete athlete : athletes) {
+            resultRepository.deleteAll(resultRepository.findByAthleteId(athlete.getId()));
+        }
+
+        // Delete all athletes of this country
+        athleteRepository.deleteAll(athletes);
+
         countryRepository.deleteById(id);
+        evictLeaderboardCacheAfterCommit();
     }
 
     /**
@@ -153,5 +176,20 @@ public class CountryService {
         response.setCode(country.getCode());
         response.setName(country.getName());
         return response;
+    }
+
+    /**
+     * Evicts the leaderboard cache after the current transaction is committed.
+     */
+    private void evictLeaderboardCacheAfterCommit() {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                var cache = cacheManager.getCache("leaderboard");
+                if (cache != null) {
+                    cache.clear();
+                }
+            }
+        });
     }
 }

@@ -82,13 +82,11 @@ public class ExcelParser {
                 String firstName = getCellValueAsString(row.getCell(0), rowNum, "firstName");
                 String lastName = getCellValueAsString(row.getCell(1), rowNum, "lastName");
                 String countryCode = getCellValueAsString(row.getCell(2), rowNum, "countryCode");
-                String gender = row.getCell(3) != null ? row.getCell(3).getStringCellValue() : null;
 
                 athletes.add(new AthleteImportDto(
                     firstName.trim(),
                     lastName.trim(),
-                    countryCode != null ? countryCode.trim() : null,
-                    gender != null ? gender.trim() : null
+                    countryCode != null ? countryCode.trim() : null
                 ));
             }
         }

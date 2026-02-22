@@ -99,14 +99,17 @@ public class LeaderboardService {
 
         if (result.getSports() != null) {
             entry.setSportName(translationService.translateSport(result.getSports().getName(), lang));
+            entry.setSportRawName(result.getSports().getName());
         }
 
         if (result.getAthlete() != null) {
+            entry.setAthleteId(result.getAthlete().getId());
             entry.setAthleteName(
                 result.getAthlete().getFirstName() + " " + result.getAthlete().getLastName()
             );
 
             if (result.getAthlete().getCountry() != null) {
+                entry.setCountryId(result.getAthlete().getCountry().getId());
                 entry.setCountryCode(result.getAthlete().getCountry().getCode());
                 entry.setCountryName(translationService.translateCountry(
                         result.getAthlete().getCountry().getName(), lang));
