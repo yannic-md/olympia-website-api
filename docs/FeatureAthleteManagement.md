@@ -24,7 +24,6 @@ Gibt eine Liste aller Athleten zurück.
       "code": "USA",
       "name": "United States"
     },
-    "gender": "F",
     "createdAt": "2026-02-17T10:00:00"
   }
 ]
@@ -53,7 +52,6 @@ Gibt einen spezifischen Athleten anhand der ID zurück.
     "code": "USA",
     "name": "United States"
   },
-  "gender": "F",
   "createdAt": "2026-02-17T10:00:00"
 }
 ```
@@ -75,8 +73,7 @@ Erstellt einen neuen Athleten.
 {
   "firstName": "Max",
   "lastName": "Mustermann",
-  "countryId": 2,
-  "gender": "M"
+  "countryId": 2
 }
 ```
 
@@ -84,7 +81,6 @@ Erstellt einen neuen Athleten.
 - `firstName` (String, erforderlich) - Vorname des Athleten
 - `lastName` (String, erforderlich) - Nachname des Athleten
 - `countryId` (Long, optional) - ID des Landes
-- `gender` (String, optional) - Geschlecht ("M", "F", oder "D")
 
 **Response:**
 ```json
@@ -97,7 +93,6 @@ Erstellt einen neuen Athleten.
     "code": "GER",
     "name": "Germany"
   },
-  "gender": "M",
   "createdAt": "2026-02-17T10:30:00"
 }
 ```
@@ -125,8 +120,7 @@ Aktualisiert die Daten eines vorhandenen Athleten.
 {
   "firstName": "Maximilian",
   "lastName": "Mustermann",
-  "countryId": 2,
-  "gender": "M"
+  "countryId": 2
 }
 ```
 
@@ -134,7 +128,6 @@ Aktualisiert die Daten eines vorhandenen Athleten.
 - `firstName` (String) - Neuer Vorname
 - `lastName` (String) - Neuer Nachname
 - `countryId` (Long) - Neue Land-ID
-- `gender` (String) - Neues Geschlecht ("M", "F", oder "D")
 
 **Response:**
 ```json
@@ -147,7 +140,6 @@ Aktualisiert die Daten eines vorhandenen Athleten.
     "code": "GER",
     "name": "Germany"
   },
-  "gender": "M",
   "createdAt": "2026-02-17T10:30:00"
 }
 ```
@@ -190,8 +182,7 @@ curl -X POST http://localhost:8080/api/athletes \
   -d '{
     "firstName": "Anna",
     "lastName": "Schmidt",
-    "countryId": 2,
-    "gender": "F"
+    "countryId": 2
   }'
 ```
 
@@ -234,6 +225,5 @@ Die Athleten werden in der `athletes` Tabelle gespeichert mit folgenden Feldern:
 - `first_name` (VARCHAR) - Vorname
 - `last_name` (VARCHAR) - Nachname
 - `country_id` (BIGINT) - Fremdschlüssel zu `countries`
-- `gender` (ENUM) - Geschlecht (M, F, D)
 - `created_at` (TIMESTAMP) - Erstellungszeitpunkt
 
