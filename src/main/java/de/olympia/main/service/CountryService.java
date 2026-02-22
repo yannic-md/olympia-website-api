@@ -2,9 +2,11 @@ package de.olympia.main.service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class CountryService {
     private final CountryRepository countryRepository;
     private final AthleteRepository athleteRepository;
     private final ResultRepository resultRepository;
+    private final CacheManager cacheManager;
 
     /**
      * Get all countries from the database
@@ -59,7 +62,6 @@ public class CountryService {
      * @return CountryResponse DTO with created country information
      * @throws IllegalArgumentException if validation fails or country code already exists
      */
-    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public CountryResponse createCountry(CreateCountryRequest request) {
         validateRequest(request.getCode(), request.getName());
@@ -74,6 +76,7 @@ public class CountryService {
         country.setName(request.getName());
 
         Country savedCountry = countryRepository.save(country);
+        evictLeaderboardCacheAfterCommit();
         return toResponse(savedCountry);
     }
 
@@ -87,7 +90,6 @@ public class CountryService {
      * @throws RuntimeException if country not found
      * @throws IllegalArgumentException if new country code is already in use
      */
-    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public CountryResponse updateCountry(Long id, UpdateCountryRequest request) {
         Country country = countryRepository.findById(id)
@@ -109,6 +111,7 @@ public class CountryService {
         }
 
         Country updatedCountry = countryRepository.save(country);
+        evictLeaderboardCacheAfterCommit();
         return toResponse(updatedCountry);
     }
 
@@ -120,7 +123,6 @@ public class CountryService {
      * @param id The ID of the country to delete
      * @throws RuntimeException if country not found
      */
-    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public void deleteCountry(Long id) {
         if (!countryRepository.existsById(id)) {
@@ -137,6 +139,7 @@ public class CountryService {
         athleteRepository.deleteAll(athletes);
 
         countryRepository.deleteById(id);
+        evictLeaderboardCacheAfterCommit();
     }
 
     /**
@@ -173,5 +176,20 @@ public class CountryService {
         response.setCode(country.getCode());
         response.setName(country.getName());
         return response;
+    }
+
+    /**
+     * Evicts the leaderboard cache after the current transaction is committed.
+     */
+    private void evictLeaderboardCacheAfterCommit() {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                var cache = cacheManager.getCache("leaderboard");
+                if (cache != null) {
+                    cache.clear();
+                }
+            }
+        });
     }
 }

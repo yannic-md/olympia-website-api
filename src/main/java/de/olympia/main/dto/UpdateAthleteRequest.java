@@ -11,5 +11,9 @@ public class UpdateAthleteRequest {
     private String firstName;
     private String lastName;
     private Long countryId;
+    private Integer goldMedals;
+    private Integer silverMedals;
+    private Integer bronzeMedals;
+    private String bestTime;
 }
 
