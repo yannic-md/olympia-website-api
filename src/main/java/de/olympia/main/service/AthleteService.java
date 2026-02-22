@@ -53,15 +53,15 @@ public class AthleteService {
     /**
      * Create a new athlete
      *
-     * @param request CreateAthleteRequest with athlete data (firstName, lastName, countryId, gender)
+     * @param request CreateAthleteRequest with athlete data (firstName, lastName, countryId)
      * @return AthleteResponse DTO with created athlete information
-     * @throws IllegalArgumentException if validation fails (missing required fields or invalid gender)
+     * @throws IllegalArgumentException if validation fails (missing required fields)
      * @throws RuntimeException if country not found
      */
     @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public AthleteResponse createAthlete(CreateAthleteRequest request) {
-        validateRequest(request.getFirstName(), request.getLastName(), request.getGender());
+        validateRequest(request.getFirstName(), request.getLastName());
 
         Athlete athlete = new Athlete();
         athlete.setFirstName(request.getFirstName());
@@ -130,22 +130,14 @@ public class AthleteService {
      *
      * @param firstName First name to validate
      * @param lastName Last name to validate
-     * @param gender Gender to validate (optional, must be M, F, or D if provided)
      * @throws IllegalArgumentException if validation fails
      */
-    private void validateRequest(String firstName, String lastName, String gender) {
+    private void validateRequest(String firstName, String lastName) {
         if (firstName == null || firstName.trim().isEmpty()) {
             throw new IllegalArgumentException("First name is required");
         }
         if (lastName == null || lastName.trim().isEmpty()) {
             throw new IllegalArgumentException("Last name is required");
-        }
-        if (gender != null && !gender.isEmpty()) {
-            try {
-                Athlete.Gender.valueOf(gender);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid gender. Must be M, F, or D");
-            }
         }
     }
 

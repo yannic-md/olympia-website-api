@@ -17,7 +17,5 @@ public class AthleteImportDto {
     private String lastName;
 
     private String countryCode;
-
-    private String gender; // M, F, D
 }
 

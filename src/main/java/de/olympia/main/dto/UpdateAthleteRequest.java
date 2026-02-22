@@ -11,6 +11,5 @@ public class UpdateAthleteRequest {
     private String firstName;
     private String lastName;
     private Long countryId;
-    private String gender; // "M", "F", or "D"
 }
 

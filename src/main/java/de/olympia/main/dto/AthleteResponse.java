@@ -14,7 +14,6 @@ public class AthleteResponse {
     private String firstName;
     private String lastName;
     private CountryDto country;
-    private String gender;
     private LocalDateTime createdAt;
 
     @Data

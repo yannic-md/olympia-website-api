@@ -35,9 +35,5 @@ public class Athlete {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-
-    public enum Gender {
-        M, F, D
-    }
 }
 
