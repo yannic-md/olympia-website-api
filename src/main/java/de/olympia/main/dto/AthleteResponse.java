@@ -1,5 +1,6 @@
 package de.olympia.main.dto;
 
+import de.olympia.main.entity.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,8 @@ public class AthleteResponse {
     private String firstName;
     private String lastName;
     private CountryDto country;
+    private String sport;
+    private Result.ScoreType scoreType;
     private LocalDateTime createdAt;
 
     @Data

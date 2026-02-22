@@ -107,42 +107,61 @@ public class AthleteService {
 
         for (int i = 0; i < gold; i++) {
             Result r = buildResult(athlete, sport, Result.Medal.GOLD,
-                    !bestTimeSet ? request.getBestTime() : null);
+                    !bestTimeSet ? request.getBestTime() : null, request.getScoreType());
             resultRepository.save(r);
             bestTimeSet = true;
         }
         for (int i = 0; i < silver; i++) {
             Result r = buildResult(athlete, sport, Result.Medal.SILVER,
-                    !bestTimeSet ? request.getBestTime() : null);
+                    !bestTimeSet ? request.getBestTime() : null, request.getScoreType());
             resultRepository.save(r);
             bestTimeSet = true;
         }
         for (int i = 0; i < bronze; i++) {
             Result r = buildResult(athlete, sport, Result.Medal.BRONZE,
-                    !bestTimeSet ? request.getBestTime() : null);
+                    !bestTimeSet ? request.getBestTime() : null, request.getScoreType());
             resultRepository.save(r);
             bestTimeSet = true;
         }
 
         // If no medal results were created but bestTime is provided, create a result without medal
         if (!bestTimeSet && request.getBestTime() != null && !request.getBestTime().isEmpty()) {
-            Result r = buildResult(athlete, sport, null, request.getBestTime());
+            Result r = buildResult(athlete, sport, null, request.getBestTime(), request.getScoreType());
             resultRepository.save(r);
         }
     }
 
     /**
      * Builds a new Result entity with the given parameters.
+     * Appends the appropriate suffix ("pts", "wins") to timeOrPoints based on scoreType
+     * so the leaderboard display can translate it correctly.
      */
-    private Result buildResult(Athlete athlete, Sports sport, Result.Medal medal, String timeOrPoints) {
+    private Result buildResult(Athlete athlete, Sports sport, Result.Medal medal, String timeOrPoints, Result.ScoreType scoreType) {
         Result r = new Result();
         r.setAthlete(athlete);
         r.setSports(sport);
         r.setMedal(medal);
+        r.setScoreType(scoreType);
         if (timeOrPoints != null && !timeOrPoints.isEmpty()) {
-            r.setTimeOrPoints(timeOrPoints);
+            r.setTimeOrPoints(formatTimeOrPoints(timeOrPoints, scoreType));
         }
         return r;
+    }
+
+    /**
+     * Appends the correct unit suffix to a score value based on its type.
+     * TIME values are stored as-is. PTS gets " pts" appended, WINS gets " wins".
+     * Already-suffixed values are not double-suffixed.
+     */
+    private String formatTimeOrPoints(String value, Result.ScoreType scoreType) {
+        if (value == null || value.isEmpty()) return value;
+        if (scoreType == Result.ScoreType.PTS && !value.endsWith(" pts")) {
+            return value + " pts";
+        }
+        if (scoreType == Result.ScoreType.WINS && !value.endsWith(" wins")) {
+            return value + " wins";
+        }
+        return value;
     }
 
     /**
@@ -186,89 +205,100 @@ public class AthleteService {
 
     /**
      * Updates the results of an athlete based on the requested medal counts and best time.
-     * Compares current medal counts with requested counts and adjusts individual result entries accordingly.
+     * Excess medal results are DELETED (not nulled) to prevent orphaned null-medal rows.
      *
      * @param athleteId The ID of the athlete whose results to update
-     * @param request The update request containing new medal counts and best time
+     * @param request The update request containing new medal counts, best time and scoreType
      */
     private void updateAthleteResults(Long athleteId, UpdateAthleteRequest request) {
         Athlete athlete = athleteRepository.findById(athleteId)
                 .orElseThrow(() -> new RuntimeException("Athlete not found with id: " + athleteId));
-        List<Result> results = resultRepository.findByAthleteId(athleteId);
 
-        // Update best time on the first result if provided
-        if (request.getBestTime() != null) {
-            if (results.isEmpty()) {
-                // Create a new result for the time/points
-                Result r = buildResult(athlete, null, null,
-                        request.getBestTime().isEmpty() ? null : request.getBestTime());
+        // Resolve the Sports entity: prefer the value from the request, fall back to the last result
+        Sports sport = null;
+        String sportName = request.getSport();
+        if (sportName == null || sportName.isEmpty()) {
+            sportName = resultRepository.findByAthleteId(athleteId).stream()
+                    .filter(r -> r.getSports() != null)
+                    .reduce((first, second) -> second)
+                    .map(r -> r.getSports().getName())
+                    .orElse(null);
+        }
+        if (sportName != null && !sportName.isEmpty()) {
+            final String name = sportName;
+            sport = sportsRepository.findByNameIgnoreCase(name).orElse(null);
+        }
+
+        int currentGold   = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.GOLD).size();
+        int currentSilver = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.SILVER).size();
+        int currentBronze = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.BRONZE).size();
+
+        int targetGold   = request.getGoldMedals()   != null ? request.getGoldMedals()   : currentGold;
+        int targetSilver = request.getSilverMedals()  != null ? request.getSilverMedals()  : currentSilver;
+        int targetBronze = request.getBronzeMedals()  != null ? request.getBronzeMedals()  : currentBronze;
+
+        updateMedalType(athlete, sport, Result.Medal.GOLD,   currentGold,   targetGold,   request.getBestTime(), request.getScoreType());
+        updateMedalType(athlete, sport, Result.Medal.SILVER, currentSilver, targetSilver, request.getBestTime(), request.getScoreType());
+        updateMedalType(athlete, sport, Result.Medal.BRONZE, currentBronze, targetBronze, request.getBestTime(), request.getScoreType());
+
+        // Always update sport, scoreType and bestTime on ALL existing medal results
+        // This ensures event_id is set even when the medal count did not change
+        final Sports resolvedSport = sport;
+        final Result.ScoreType resolvedScoreType = request.getScoreType();
+        List<Result> allResults = resultRepository.findByAthleteId(athleteId);
+        for (Result r : allResults) {
+            boolean changed = false;
+
+            if (resolvedSport != null && !resolvedSport.equals(r.getSports())) {
+                r.setSports(resolvedSport);
+                changed = true;
+            }
+            if (resolvedScoreType != null && !resolvedScoreType.equals(r.getScoreType())) {
+                r.setScoreType(resolvedScoreType);
+                changed = true;
+            }
+            if (request.getBestTime() != null && !request.getBestTime().isEmpty()) {
+                // Use the effective scoreType: from request if provided, else from the (possibly just updated) result
+                Result.ScoreType effectiveScoreType = resolvedScoreType != null ? resolvedScoreType : r.getScoreType();
+                r.setTimeOrPoints(formatTimeOrPoints(request.getBestTime(), effectiveScoreType));
+                changed = true;
+            }
+
+            if (changed) {
                 resultRepository.save(r);
-                results = resultRepository.findByAthleteId(athleteId);
-            } else {
-                results.get(0).setTimeOrPoints(request.getBestTime().isEmpty() ? null : request.getBestTime());
-                resultRepository.save(results.get(0));
             }
         }
-
-        // Count current medals
-        int currentGold = 0, currentSilver = 0, currentBronze = 0;
-        for (Result r : results) {
-            if (r.getMedal() == null) continue;
-            switch (r.getMedal()) {
-                case GOLD -> currentGold++;
-                case SILVER -> currentSilver++;
-                case BRONZE -> currentBronze++;
-            }
-        }
-
-        int targetGold = request.getGoldMedals() != null ? request.getGoldMedals() : currentGold;
-        int targetSilver = request.getSilverMedals() != null ? request.getSilverMedals() : currentSilver;
-        int targetBronze = request.getBronzeMedals() != null ? request.getBronzeMedals() : currentBronze;
-
-        // Update medals on existing results, create new ones if needed
-        updateMedalType(athlete, results, Result.Medal.GOLD, currentGold, targetGold);
-        updateMedalType(athlete, results, Result.Medal.SILVER, currentSilver, targetSilver);
-        updateMedalType(athlete, results, Result.Medal.BRONZE, currentBronze, targetBronze);
     }
 
     /**
-     * Adjusts the number of a specific medal type across an athlete's results.
-     * If the target count is lower, removes medals from results. If higher, assigns medals to
-     * results that currently have no medal, or creates new result entries.
+     * Adjusts the number of a specific medal type for an athlete.
+     * Deletes surplus rows — prevents null-medal entries from accumulating.
+     * Creates new result rows when the target exceeds the current count.
      *
-     * @param results The list of the athlete's results
-     * @param medalType The medal type to adjust (GOLD, SILVER, BRONZE)
-     * @param current The current count of this medal type
-     * @param target The desired count of this medal type
+     * @param athlete   The athlete entity
+     * @param sport     The sports entity (may be null)
+     * @param medalType The medal type to adjust
+     * @param current   Current count of this medal type
+     * @param target    Desired count of this medal type
+     * @param bestTime  The time/points value to set on new results
+     * @param scoreType The score type to set on new results
      */
-    private void updateMedalType(Athlete athlete, List<Result> results, Result.Medal medalType, int current, int target) {
+    private void updateMedalType(Athlete athlete, Sports sport, Result.Medal medalType,
+                                  int current, int target, String bestTime, Result.ScoreType scoreType) {
         if (target == current) return;
 
         if (target < current) {
-            // Remove excess medals
-            int toRemove = current - target;
-            for (Result r : results) {
-                if (toRemove <= 0) break;
-                if (r.getMedal() == medalType) {
-                    r.setMedal(null);
-                    resultRepository.save(r);
-                    toRemove--;
-                }
-            }
+            // Delete excess medal results — fixes the null-medal orphan problem
+            List<Result> existing = resultRepository.findByAthleteIdAndMedal(athlete.getId(), medalType);
+            int toDelete = current - target;
+            List<Result> forDeletion = existing.subList(0, toDelete);
+            resultRepository.deleteAll(forDeletion);
         } else {
-            // Add missing medals to results without a medal
+            // Create missing result rows
             int toAdd = target - current;
-            for (Result r : results) {
-                if (toAdd <= 0) break;
-                if (r.getMedal() == null) {
-                    r.setMedal(medalType);
-                    resultRepository.save(r);
-                    toAdd--;
-                }
-            }
-            // If there are still medals to add, create new result entries
             for (int i = 0; i < toAdd; i++) {
-                Result r = buildResult(athlete, null, medalType, null);
+                Result r = buildResult(athlete, sport, medalType,
+                        bestTime != null && !bestTime.isEmpty() ? bestTime : null, scoreType);
                 resultRepository.save(r);
             }
         }
@@ -317,6 +347,15 @@ public class AthleteService {
         response.setFirstName(athlete.getFirstName());
         response.setLastName(athlete.getLastName());
         response.setCreatedAt(athlete.getCreatedAt());
+
+        // Derive sport and scoreType from the athlete's most recent result
+        resultRepository.findByAthleteId(athlete.getId()).stream()
+                .filter(r -> r.getSports() != null)
+                .reduce((first, second) -> second) // last element
+                .ifPresent(r -> {
+                    response.setSport(r.getSports().getName());
+                    response.setScoreType(r.getScoreType());
+                });
 
         if (athlete.getCountry() != null) {
             AthleteResponse.CountryDto countryDto = new AthleteResponse.CountryDto();

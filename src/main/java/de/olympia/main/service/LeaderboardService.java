@@ -99,6 +99,7 @@ public class LeaderboardService {
 
         if (result.getSports() != null) {
             entry.setSportName(translationService.translateSport(result.getSports().getName(), lang));
+            entry.setSportRawName(result.getSports().getName());
         }
 
         if (result.getAthlete() != null) {
