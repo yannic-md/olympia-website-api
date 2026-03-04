@@ -19,7 +19,17 @@ public class Country {
     @Column(nullable = false, unique = true, length = 8)
     private String code;
 
+    /** Raw/original country name (used as CRUD key and legacy fallback). */
     @Column(nullable = false, length = 150)
     private String name;
+
+    @Column(name = "name_en", length = 150)
+    private String nameEn;
+
+    @Column(name = "name_de", length = 150)
+    private String nameDe;
+
+    @Column(name = "name_fr", length = 150)
+    private String nameFr;
 }
 

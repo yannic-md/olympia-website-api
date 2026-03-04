@@ -9,7 +9,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.olympia.main.dto.CountryResponse;
 import de.olympia.main.dto.CreateCountryRequest;
@@ -28,32 +27,6 @@ public class CountryService {
     private final AthleteRepository athleteRepository;
     private final ResultRepository resultRepository;
     private final CacheManager cacheManager;
-
-    /**
-     * Get all countries from the database
-     *
-     * @return List of all countries as CountryResponse DTOs
-     */
-    @Transactional(readOnly = true)
-    public List<CountryResponse> getAllCountries() {
-        return countryRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get a specific country by ID
-     *
-     * @param id The ID of the country to retrieve
-     * @return CountryResponse DTO with country information
-     * @throws RuntimeException if country not found
-     */
-    @Transactional(readOnly = true)
-    public CountryResponse getCountryById(Long id) {
-        Country country = countryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Country not found with id: " + id));
-        return toResponse(country);
-    }
 
     /**
      * Create a new country
@@ -179,15 +152,17 @@ public class CountryService {
     }
 
     /**
-     * Evicts the leaderboard cache after the current transaction is committed.
+     * Evicts the leaderboard cache and all V2 caches after the current transaction is committed.
      */
     private void evictLeaderboardCacheAfterCommit() {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                var cache = cacheManager.getCache("leaderboard");
-                if (cache != null) {
-                    cache.clear();
+                for (String cacheName : List.of("v2Athletes", "v2Countries", "v2Sports", "v2Leaderboard")) {
+                    var cache = cacheManager.getCache(cacheName);
+                    if (cache != null) {
+                        cache.clear();
+                    }
                 }
             }
         });
