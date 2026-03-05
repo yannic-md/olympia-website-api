@@ -246,6 +246,9 @@ public class V2PublicService {
                 country.getId(),
                 country.getCode(),
                 resolveCountryName(country, lang),
+                country.getNameEn(),
+                country.getNameDe(),
+                country.getNameFr(),
                 summary,
                 null, // rank assigned after all countries are built
                 athleteRefs
@@ -257,7 +260,9 @@ public class V2PublicService {
                 .map(r -> {
                     String countryCode = null;
                     String countryName = null;
+                    Long countryId = null;
                     if (r.getAthlete().getCountry() != null) {
+                        countryId = r.getAthlete().getCountry().getId();
                         countryCode = r.getAthlete().getCountry().getCode();
                         countryName = resolveCountryName(r.getAthlete().getCountry(), lang);
                     }
@@ -265,6 +270,7 @@ public class V2PublicService {
                             r.getAthlete().getId(),
                             r.getAthlete().getFirstName(),
                             r.getAthlete().getLastName(),
+                            countryId,
                             countryCode,
                             countryName,
                             r.getMedal() != null ? r.getMedal().name() : null,

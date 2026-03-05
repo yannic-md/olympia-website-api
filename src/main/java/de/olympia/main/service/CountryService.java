@@ -47,6 +47,9 @@ public class CountryService {
         Country country = new Country();
         country.setCode(request.getCode());
         country.setName(request.getName());
+        country.setNameEn(request.getNameEn());
+        country.setNameDe(request.getNameDe());
+        country.setNameFr(request.getNameFr());
 
         Country savedCountry = countryRepository.save(country);
         evictLeaderboardCacheAfterCommit();
@@ -82,6 +85,11 @@ public class CountryService {
         if (request.getName() != null && !request.getName().isEmpty()) {
             country.setName(request.getName());
         }
+
+        // Always overwrite translation fields so they can be explicitly cleared (set to null)
+        country.setNameEn(request.getNameEn() != null && !request.getNameEn().isEmpty() ? request.getNameEn() : null);
+        country.setNameDe(request.getNameDe() != null && !request.getNameDe().isEmpty() ? request.getNameDe() : null);
+        country.setNameFr(request.getNameFr() != null && !request.getNameFr().isEmpty() ? request.getNameFr() : null);
 
         Country updatedCountry = countryRepository.save(country);
         evictLeaderboardCacheAfterCommit();
@@ -148,6 +156,9 @@ public class CountryService {
         response.setId(country.getId());
         response.setCode(country.getCode());
         response.setName(country.getName());
+        response.setNameEn(country.getNameEn());
+        response.setNameDe(country.getNameDe());
+        response.setNameFr(country.getNameFr());
         return response;
     }
 

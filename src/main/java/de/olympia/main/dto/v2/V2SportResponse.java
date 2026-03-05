@@ -32,6 +32,7 @@ public class V2SportResponse {
         private Long athleteId;
         private String firstName;
         private String lastName;
+        private Long countryId;
         private String countryCode;
         private String countryName;
         /** Medal received, null if none. */
