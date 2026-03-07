@@ -69,7 +69,7 @@ public class ResultService {
         Result.ScoreType scoreType = request.getScoreType() != null ? request.getScoreType()
                 : (sport.getScoreType() != null ? Result.ScoreType.valueOf(sport.getScoreType().name()) : null);
         result.setScoreType(scoreType);
-        result.setTimeOrPoints(formatTimeOrPoints(request.getTimeOrPoints(), scoreType));
+        result.setTimeOrPoints(stripSuffix(request.getTimeOrPoints()));
 
         // Derive rank from medal — overrides any client-supplied value
         result.setRank(medalToRank(request.getMedal()));
@@ -121,23 +121,16 @@ public class ResultService {
     }
 
     /**
-     * Appends the appropriate unit suffix to a raw score value.
-     * TIME values are stored unchanged; PTS gets " pts", WINS gets " wins".
-     * Already-suffixed values are not double-suffixed.
+     * Strips any legacy unit suffix (" pts", " wins") from a raw score value
+     * so that only the numeric/time part is persisted in the database.
+     * The frontend is responsible for appending a localised label on display.
      *
-     * @param value     The raw input string.
-     * @param scoreType The score type determining the suffix.
-     * @return The formatted string, or the original value when no suffix applies.
+     * @param value The raw input string (may already contain a suffix from older data).
+     * @return The trimmed value without any suffix, or the original value when null/empty.
      */
-    private String formatTimeOrPoints(String value, Result.ScoreType scoreType) {
+    private String stripSuffix(String value) {
         if (value == null || value.isEmpty()) return value;
-        if (scoreType == Result.ScoreType.PTS && !value.endsWith(" pts")) {
-            return value + " pts";
-        }
-        if (scoreType == Result.ScoreType.WINS && !value.endsWith(" wins")) {
-            return value + " wins";
-        }
-        return value;
+        return value.replaceAll("(?i)\\s*(pts|wins)$", "").trim();
     }
 
     /**
