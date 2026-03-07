@@ -136,14 +136,14 @@ INSERT INTO results (event_id, athlete_id, rank, time_or_points, medal, score_ty
 
 -- ── Sport 2: Biathlon (TIME) ─────────────────────────────────
 -- Boe (5) wins Gold here
-(2,  5,  1, '20:45.2', 'GOLD',   'TIME', 1),  -- Johannes Boe         🥇
+(2,  5,  1, '20:18.2', 'GOLD',   'TIME', 1),  -- Johannes Boe         🥇
 (2,  6,  2, '20:23.1', 'SILVER', 'TIME', 1),  -- Marte Roeiseland     🥈
 (2,  7,  3, '20:48.3', 'BRONZE', 'TIME', 1),  -- Dorothea Wierer      🥉
 (2,  8,  4, '24:01.8', NULL,     'TIME', 1),  -- Martin Fourcade
 
 -- ── Sport 3: Cross-Country Skiing (TIME) ─────────────────────
 -- Boe (5) wins Gold here too
-(3,  5,  1, '33:15.0', 'GOLD',   'TIME', 1),  -- Johannes Boe         🥇 (multi-sport)
+(3,  5,  1, '23:15.0', 'GOLD',   'TIME', 1),  -- Johannes Boe         🥇 (multi-sport)
 (3,  10, 2, '24:54.2', 'SILVER', 'TIME', 1),  -- Therese Johaug       🥈
 (3,  11, 3, '34:01.2', 'BRONZE', 'TIME', 1),  -- Federico Pellegrino  🥉
 (3,  12, 4, '25:12.8', NULL,     'TIME', 1),  -- Ebba Andersson
@@ -184,14 +184,14 @@ INSERT INTO results (event_id, athlete_id, rank, time_or_points, medal, score_ty
 
 -- ── Sport 9: Speed Skating (TIME) ────────────────────────────
 -- Gu (20) takes Bronze → 1× Gold, 1× Silver, 1× Bronze = Platz 3
-(9,  32, 1, '6:08.84', 'GOLD',   'TIME', 1),  -- Nils van der Poel    🥇
+(9,  32, 1, '2:08.84', 'GOLD',   'TIME', 1),  -- Nils van der Poel    🥇
 (9,  33, 2, '3:56.93', 'SILVER', 'TIME', 1),  -- Ireen Wust           🥈
 (9,  20, 3, '6:11.20', 'BRONZE', 'TIME', 1),  -- Eileen Gu            🥉 (multi-sport)
 (9,  34, 4, '6:12.45', NULL,     'TIME', 1),  -- Thomas Krol
 (9,  35, 5, '3:58.09', NULL,     'TIME', 1),  -- Miho Takagi
 
 -- ── Sport 10: Short Track Speed Skating (TIME) ───────────────
-(10, 36, 1, '2:09.25', 'GOLD',   'TIME', 1),  -- Hwang Daeheon        🥇
+(10, 36, 1, '1:09.25', 'GOLD',   'TIME', 1),  -- Hwang Daeheon        🥇
 (10, 37, 2, '1:28.39', 'SILVER', 'TIME', 1),  -- Suzanne Schulting    🥈
 (10, 38, 3, '2:09.48', 'BRONZE', 'TIME', 1),  -- Steven Dubois        🥉
 (10, 39, 4, '1:28.66', NULL,     'TIME', 1),  -- Arianna Fontana

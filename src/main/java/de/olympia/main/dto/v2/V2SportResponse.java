@@ -35,11 +35,10 @@ public class V2SportResponse {
         private Long countryId;
         private String countryCode;
         private String countryName;
-        /** Medal received, null if none. */
         private String medal;
-        /** Best result value (time, points, wins). */
         private String result;
         private Integer rank;
+        private Long resultId;
     }
 }
 

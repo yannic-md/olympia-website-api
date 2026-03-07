@@ -275,7 +275,8 @@ public class V2PublicService {
                             countryName,
                             r.getMedal() != null ? r.getMedal().name() : null,
                             r.getTimeOrPoints(),
-                            r.getRank()
+                            r.getRank(),
+                            r.getId()
                     );
                 })
                 .sorted(Comparator.comparingInt(p -> p.getRank() != null ? p.getRank() : Integer.MAX_VALUE))

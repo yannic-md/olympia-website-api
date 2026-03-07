@@ -49,7 +49,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login").permitAll()
                 .requestMatchers("/api/v2/public/**").permitAll()  // V2 Public endpoints (no auth required)
-                .requestMatchers("/api/athletes/**", "/api/countries/**").authenticated()
+                .requestMatchers("/api/athletes/**", "/api/countries/**", "/api/results/**").authenticated()
                 /*
                 * replace the above line with the following if you want to restrict registration to admins only
                 * ---------------------------------------------------------------------------------------------
