@@ -95,4 +95,22 @@ public class AuthService {
             "Admin login successful"
         );
     }
+
+    /**
+     * Get user information by username (for /me endpoint)
+     *
+     * @param username The username to look up
+     * @return LoginResponse with user information
+     * @throws RuntimeException if user not found
+     */
+    public LoginResponse getUserInfo(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new LoginResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getRole().toString(),
+            "OK"
+        );
+    }
 }
