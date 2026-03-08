@@ -9,7 +9,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.olympia.main.dto.AthleteResponse;
 import de.olympia.main.dto.CreateAthleteRequest;
@@ -32,32 +31,6 @@ public class AthleteService {
     private final ResultRepository resultRepository;
     private final SportsRepository sportsRepository;
     private final CacheManager cacheManager;
-
-    /**
-     * Get all athletes from the database
-     *
-     * @return List of all athletes as AthleteResponse DTOs
-     */
-    @Transactional(readOnly = true)
-    public List<AthleteResponse> getAllAthletes() {
-        return athleteRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get a specific athlete by ID
-     *
-     * @param id The ID of the athlete to retrieve
-     * @return AthleteResponse DTO with athlete information
-     * @throws RuntimeException if athlete not found
-     */
-    @Transactional(readOnly = true)
-    public AthleteResponse getAthleteById(Long id) {
-        Athlete athlete = athleteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Athlete not found with id: " + id));
-        return toResponse(athlete);
-    }
 
     /**
      * Create a new athlete
@@ -225,8 +198,7 @@ public class AthleteService {
                     .orElse(null);
         }
         if (sportName != null && !sportName.isEmpty()) {
-            final String name = sportName;
-            sport = sportsRepository.findByNameIgnoreCase(name).orElse(null);
+            sport = sportsRepository.findByNameIgnoreCase(sportName).orElse(null);
         }
 
         int currentGold   = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.GOLD).size();
@@ -348,20 +320,45 @@ public class AthleteService {
         response.setLastName(athlete.getLastName());
         response.setCreatedAt(athlete.getCreatedAt());
 
+        List<Result> results = resultRepository.findByAthleteId(athlete.getId());
+
         // Derive sport and scoreType from the athlete's most recent result
-        resultRepository.findByAthleteId(athlete.getId()).stream()
+        results.stream()
                 .filter(r -> r.getSports() != null)
-                .reduce((first, second) -> second) // last element
+                .reduce((first, second) -> second)
                 .ifPresent(r -> {
                     response.setSport(r.getSports().getName());
                     response.setScoreType(r.getScoreType());
                 });
 
+        int gold   = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.GOLD).count();
+        int silver = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.SILVER).count();
+        int bronze = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.BRONZE).count();
+        response.setMedals(new AthleteResponse.MedalsDto(gold, silver, bronze, gold + silver + bronze));
+
+        List<AthleteResponse.ResultDto> resultDtos = results.stream()
+                .filter(r -> r.getSports() != null)
+                .map(r -> new AthleteResponse.ResultDto(
+                        r.getSports().getId(),
+                        r.getSports().getName(),
+                        r.getSports().getName(),
+                        r.getScoreType() != null ? r.getScoreType().name() : null,
+                        r.getTimeOrPoints(),
+                        r.getRank(),
+                        r.getMedal() != null ? r.getMedal().name() : null
+                ))
+                .collect(java.util.stream.Collectors.toList());
+        response.setResults(resultDtos);
+
         if (athlete.getCountry() != null) {
+            Country c = athlete.getCountry();
             AthleteResponse.CountryDto countryDto = new AthleteResponse.CountryDto();
-            countryDto.setId(athlete.getCountry().getId());
-            countryDto.setCode(athlete.getCountry().getCode());
-            countryDto.setName(athlete.getCountry().getName());
+            countryDto.setId(c.getId());
+            countryDto.setCode(c.getCode());
+            countryDto.setName(c.getName());
+            countryDto.setNameEn(c.getNameEn());
+            countryDto.setNameDe(c.getNameDe());
+            countryDto.setNameFr(c.getNameFr());
             response.setCountry(countryDto);
         }
 
@@ -376,9 +373,11 @@ public class AthleteService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                var cache = cacheManager.getCache("leaderboard");
-                if (cache != null) {
-                    cache.clear();
+                for (String cacheName : List.of("leaderboard", "v2Athletes", "v2Countries", "v2Sports", "v2Leaderboard")) {
+                    var cache = cacheManager.getCache(cacheName);
+                    if (cache != null) {
+                        cache.clear();
+                    }
                 }
             }
         });

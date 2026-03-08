@@ -51,9 +51,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login", "/api/auth/logout", "/api/auth/me").permitAll()
-                .requestMatchers("/api/public/**").permitAll() // Public endpoints (no auth required)
-                .requestMatchers("/api/athletes/**", "/api/countries/**").authenticated()
+                    .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login", "/api/auth/logout", "/api/auth/me").permitAll()
+                    .requestMatchers("/api/v2/public/**").permitAll()  // V2 Public endpoints (no auth required)
+                    .requestMatchers("/api/athletes/**", "/api/countries/**", "/api/results/**").authenticated()
                 /*
                 * replace the above line with the following if you want to restrict registration to admins only
                 * ---------------------------------------------------------------------------------------------
