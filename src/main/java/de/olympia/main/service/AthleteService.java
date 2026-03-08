@@ -9,7 +9,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.olympia.main.dto.AthleteResponse;
 import de.olympia.main.dto.CreateAthleteRequest;
@@ -32,32 +31,6 @@ public class AthleteService {
     private final ResultRepository resultRepository;
     private final SportsRepository sportsRepository;
     private final CacheManager cacheManager;
-
-    /**
-     * Get all athletes from the database
-     *
-     * @return List of all athletes as AthleteResponse DTOs
-     */
-    @Transactional(readOnly = true)
-    public List<AthleteResponse> getAllAthletes() {
-        return athleteRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get a specific athlete by ID
-     *
-     * @param id The ID of the athlete to retrieve
-     * @return AthleteResponse DTO with athlete information
-     * @throws RuntimeException if athlete not found
-     */
-    @Transactional(readOnly = true)
-    public AthleteResponse getAthleteById(Long id) {
-        Athlete athlete = athleteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Athlete not found with id: " + id));
-        return toResponse(athlete);
-    }
 
     /**
      * Create a new athlete
@@ -225,8 +198,7 @@ public class AthleteService {
                     .orElse(null);
         }
         if (sportName != null && !sportName.isEmpty()) {
-            final String name = sportName;
-            sport = sportsRepository.findByNameIgnoreCase(name).orElse(null);
+            sport = sportsRepository.findByNameIgnoreCase(sportName).orElse(null);
         }
 
         int currentGold   = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.GOLD).size();
@@ -376,9 +348,11 @@ public class AthleteService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                var cache = cacheManager.getCache("leaderboard");
-                if (cache != null) {
-                    cache.clear();
+                for (String cacheName : List.of("leaderboard", "v2Athletes", "v2Countries", "v2Sports", "v2Leaderboard")) {
+                    var cache = cacheManager.getCache(cacheName);
+                    if (cache != null) {
+                        cache.clear();
+                    }
                 }
             }
         });

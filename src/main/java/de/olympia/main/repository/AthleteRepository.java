@@ -11,7 +11,6 @@ import de.olympia.main.entity.Athlete;
 @Repository
 public interface AthleteRepository extends JpaRepository<Athlete, Long> {
     List<Athlete> findByCountryId(Long countryId);
-    List<Athlete> findByLastNameContainingIgnoreCase(String lastName);
     Optional<Athlete> findByFirstNameAndLastName(String firstName, String lastName);
 }
 

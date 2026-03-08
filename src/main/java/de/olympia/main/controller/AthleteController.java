@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 import de.olympia.main.dto.AthleteResponse;
 import de.olympia.main.dto.CreateAthleteRequest;
 import de.olympia.main.dto.UpdateAthleteRequest;
@@ -20,28 +18,6 @@ import de.olympia.main.service.AthleteService;
 public class AthleteController {
 
     private final AthleteService athleteService;
-
-    /**
-     * Get all athletes - accessible to all authenticated users
-     */
-    @GetMapping
-    public ResponseEntity<List<AthleteResponse>> getAllAthletes() {
-        List<AthleteResponse> athletes = athleteService.getAllAthletes();
-        return ResponseEntity.ok(athletes);
-    }
-
-    /**
-     * Get athlete by ID - accessible to all authenticated users
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<AthleteResponse> getAthleteById(@PathVariable Long id) {
-        try {
-            AthleteResponse athlete = athleteService.getAthleteById(id);
-            return ResponseEntity.ok(athlete);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     /**
      * Create new athlete - only ADMIN and JUDGE roles

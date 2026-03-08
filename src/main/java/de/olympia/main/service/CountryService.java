@@ -9,7 +9,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.olympia.main.dto.CountryResponse;
 import de.olympia.main.dto.CreateCountryRequest;
@@ -30,32 +29,6 @@ public class CountryService {
     private final CacheManager cacheManager;
 
     /**
-     * Get all countries from the database
-     *
-     * @return List of all countries as CountryResponse DTOs
-     */
-    @Transactional(readOnly = true)
-    public List<CountryResponse> getAllCountries() {
-        return countryRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get a specific country by ID
-     *
-     * @param id The ID of the country to retrieve
-     * @return CountryResponse DTO with country information
-     * @throws RuntimeException if country not found
-     */
-    @Transactional(readOnly = true)
-    public CountryResponse getCountryById(Long id) {
-        Country country = countryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Country not found with id: " + id));
-        return toResponse(country);
-    }
-
-    /**
      * Create a new country
      *
      * @param request CreateCountryRequest with country data (code, name)
@@ -74,6 +47,9 @@ public class CountryService {
         Country country = new Country();
         country.setCode(request.getCode());
         country.setName(request.getName());
+        country.setNameEn(request.getNameEn());
+        country.setNameDe(request.getNameDe());
+        country.setNameFr(request.getNameFr());
 
         Country savedCountry = countryRepository.save(country);
         evictLeaderboardCacheAfterCommit();
@@ -109,6 +85,11 @@ public class CountryService {
         if (request.getName() != null && !request.getName().isEmpty()) {
             country.setName(request.getName());
         }
+
+        // Always overwrite translation fields so they can be explicitly cleared (set to null)
+        country.setNameEn(request.getNameEn() != null && !request.getNameEn().isEmpty() ? request.getNameEn() : null);
+        country.setNameDe(request.getNameDe() != null && !request.getNameDe().isEmpty() ? request.getNameDe() : null);
+        country.setNameFr(request.getNameFr() != null && !request.getNameFr().isEmpty() ? request.getNameFr() : null);
 
         Country updatedCountry = countryRepository.save(country);
         evictLeaderboardCacheAfterCommit();
@@ -175,19 +156,24 @@ public class CountryService {
         response.setId(country.getId());
         response.setCode(country.getCode());
         response.setName(country.getName());
+        response.setNameEn(country.getNameEn());
+        response.setNameDe(country.getNameDe());
+        response.setNameFr(country.getNameFr());
         return response;
     }
 
     /**
-     * Evicts the leaderboard cache after the current transaction is committed.
+     * Evicts the leaderboard cache and all V2 caches after the current transaction is committed.
      */
     private void evictLeaderboardCacheAfterCommit() {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                var cache = cacheManager.getCache("leaderboard");
-                if (cache != null) {
-                    cache.clear();
+                for (String cacheName : List.of("v2Athletes", "v2Countries", "v2Sports", "v2Leaderboard")) {
+                    var cache = cacheManager.getCache(cacheName);
+                    if (cache != null) {
+                        cache.clear();
+                    }
                 }
             }
         });
