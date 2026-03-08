@@ -320,20 +320,45 @@ public class AthleteService {
         response.setLastName(athlete.getLastName());
         response.setCreatedAt(athlete.getCreatedAt());
 
+        List<Result> results = resultRepository.findByAthleteId(athlete.getId());
+
         // Derive sport and scoreType from the athlete's most recent result
-        resultRepository.findByAthleteId(athlete.getId()).stream()
+        results.stream()
                 .filter(r -> r.getSports() != null)
-                .reduce((first, second) -> second) // last element
+                .reduce((first, second) -> second)
                 .ifPresent(r -> {
                     response.setSport(r.getSports().getName());
                     response.setScoreType(r.getScoreType());
                 });
 
+        int gold   = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.GOLD).count();
+        int silver = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.SILVER).count();
+        int bronze = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.BRONZE).count();
+        response.setMedals(new AthleteResponse.MedalsDto(gold, silver, bronze, gold + silver + bronze));
+
+        List<AthleteResponse.ResultDto> resultDtos = results.stream()
+                .filter(r -> r.getSports() != null)
+                .map(r -> new AthleteResponse.ResultDto(
+                        r.getSports().getId(),
+                        r.getSports().getName(),
+                        r.getSports().getName(),
+                        r.getScoreType() != null ? r.getScoreType().name() : null,
+                        r.getTimeOrPoints(),
+                        r.getRank(),
+                        r.getMedal() != null ? r.getMedal().name() : null
+                ))
+                .collect(java.util.stream.Collectors.toList());
+        response.setResults(resultDtos);
+
         if (athlete.getCountry() != null) {
+            Country c = athlete.getCountry();
             AthleteResponse.CountryDto countryDto = new AthleteResponse.CountryDto();
-            countryDto.setId(athlete.getCountry().getId());
-            countryDto.setCode(athlete.getCountry().getCode());
-            countryDto.setName(athlete.getCountry().getName());
+            countryDto.setId(c.getId());
+            countryDto.setCode(c.getCode());
+            countryDto.setName(c.getName());
+            countryDto.setNameEn(c.getNameEn());
+            countryDto.setNameDe(c.getNameDe());
+            countryDto.setNameFr(c.getNameFr());
             response.setCountry(countryDto);
         }
 

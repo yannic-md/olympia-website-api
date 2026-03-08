@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +18,8 @@ public class AthleteResponse {
     private CountryDto country;
     private String sport;
     private Result.ScoreType scoreType;
+    private MedalsDto medals;
+    private List<ResultDto> results;
     private LocalDateTime createdAt;
 
     @Data
@@ -26,6 +29,32 @@ public class AthleteResponse {
         private Long id;
         private String code;
         private String name;
+        private String nameEn;
+        private String nameDe;
+        private String nameFr;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MedalsDto {
+        private int gold;
+        private int silver;
+        private int bronze;
+        private int total;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResultDto {
+        private Long sportId;
+        private String sportName;
+        private String sportRawName;
+        private String scoreType;
+        private String result;
+        private Integer rank;
+        private String medal;
     }
 }
 
