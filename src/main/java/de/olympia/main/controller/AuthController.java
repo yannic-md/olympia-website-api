@@ -1,5 +1,6 @@
 package de.olympia.main.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -81,15 +82,24 @@ public class AuthController {
     }
 
     /**
-     * Invalidates the current session and clears the security context.
+     * Invalidates the current session, clears the security context and
+     * explicitly expires the session cookie on the client side.
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse httpResponse) {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
         SecurityContextHolder.clearContext();
+
+        // Also remove the now expired cookie for the frontend
+        Cookie sessionCookie = new Cookie("JSESSIONID", "");
+        sessionCookie.setMaxAge(0);
+        sessionCookie.setHttpOnly(true);
+        sessionCookie.setPath("/");
+        httpResponse.addCookie(sessionCookie);
+
         return ResponseEntity.ok().build();
     }
 
