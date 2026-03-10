@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,10 +47,13 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login").permitAll()
-                .requestMatchers("/api/v2/public/**").permitAll()  // V2 Public endpoints (no auth required)
-                .requestMatchers("/api/athletes/**", "/api/countries/**", "/api/results/**").authenticated()
+                    .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/admin/login", "/api/auth/logout", "/api/auth/me").permitAll()
+                    .requestMatchers("/api/v2/public/**").permitAll()  // V2 Public endpoints (no auth required)
+                    .requestMatchers("/api/athletes/**", "/api/countries/**", "/api/results/**").authenticated()
                 /*
                 * replace the above line with the following if you want to restrict registration to admins only
                 * ---------------------------------------------------------------------------------------------
@@ -57,8 +61,7 @@ public class SecurityConfig {
                 * .requestMatchers("/api/auth/register").hasRole("ADMIN")
                 * */
                 .anyRequest().authenticated()
-            )
-            .httpBasic(basic -> {});
+            );
 
         return http.build();
     }
