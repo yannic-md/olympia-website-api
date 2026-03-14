@@ -123,9 +123,9 @@ public class ExcelParser {
                 String athleteFirstName = getCellValueAsString(row.getCell(0), rowNum, "athleteFirstName");
                 String athleteLastName = getCellValueAsString(row.getCell(1), rowNum, "athleteLastName");
                 Integer rank = getCellValueAsInteger(row.getCell(2), rowNum, "rank");
-                String timeOrPoints = row.getCell(3) != null ? row.getCell(3).getStringCellValue() : null;
-                String scoreType = row.getCell(4) != null ? row.getCell(4).getStringCellValue() : null;
-                String medal = row.getCell(5) != null ? row.getCell(5).getStringCellValue() : null;
+                String timeOrPoints = getCellValueAsOptionalString(row.getCell(3));
+                String scoreType = getCellValueAsOptionalString(row.getCell(4));
+                String medal = getCellValueAsOptionalString(row.getCell(5));
 
                 results.add(new ResultImportDto(
                     athleteFirstName.trim(),
@@ -180,7 +180,7 @@ public class ExcelParser {
     }
 
     /**
-     * Get cell value as string
+     * Get cell value as string (required field)
      */
     private String getCellValueAsString(Cell cell, int rowNum, String fieldName) {
         if (cell == null) {
@@ -204,6 +204,36 @@ public class ExcelParser {
             rowNum,
             fieldName
         );
+    }
+
+    /**
+     * Get cell value as optional string (nullable field)
+     */
+    private String getCellValueAsOptionalString(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        if (cell.getCellType() == CellType.BLANK) {
+            return null;
+        }
+
+        if (cell.getCellType() == CellType.STRING) {
+            String value = cell.getStringCellValue();
+            return value != null && !value.isEmpty() ? value : null;
+        } else if (cell.getCellType() == CellType.NUMERIC) {
+            // Handle numeric cells (e.g., times stored as numbers)
+            return String.valueOf(cell.getNumericCellValue());
+        }
+
+        // For other types, try to get string representation
+        try {
+            String value = cell.toString();
+            return value != null && !value.isEmpty() ? value : null;
+        } catch (Exception e) {
+            // If conversion fails, return null instead of throwing exception for optional fields
+            return null;
+        }
     }
 
     /**
