@@ -1,5 +1,7 @@
 # olympia-website-api
 
+## 🔨 How can i use the project?
+
 ## Login Daten
 - Admin: `admin` / `adminpwd`
 - Judge1: `judge1` / `judge1pwd`
