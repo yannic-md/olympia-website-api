@@ -28,7 +28,7 @@
    - [Requirements](#requirements)
    - [Default Login-Data](#default-login-data)
    - [Start the project](#start-the-project)
-- [⚙️ Explanation of the Code-Structure](#-explanation-of-the-code-structure)
+- [⚙️ Explanation of the Code-Structure](#%EF%B8%8F-explanation-of-the-code-structure)
     - [1. General](#1-general)
     - [2. Flyway](#2-flyway)
     - [3. Entity](#3-entity)
