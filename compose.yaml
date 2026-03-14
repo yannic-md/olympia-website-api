@@ -1,5 +1,5 @@
 services:
-  mariadb:
+  olympia-db:
     image: 'mariadb:latest'
     environment:
       - 'MARIADB_DATABASE=olympia'
@@ -8,5 +8,25 @@ services:
       - 'MARIADB_USER=user'
     ports:
       - '3306:3306'
-    expose:
-      - '3306'
+    # add a health-check for the backend so it knows when its ready
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  olympia-backend:
+    build: . # tell docker that it should use the dockerfile
+    ports:
+      - '8080:8080'
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://olympia-db:3306/olympia
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=secret
+      # important for flyway
+      - SPRING_FLYWAY_URL=jdbc:mariadb://olympia-db:3306/olympia
+      - SPRING_FLYWAY_USER=user
+      - SPRING_FLYWAY_PASSWORD=secret
+    depends_on:
+      olympia-db:
+        condition: service_healthy # wait until database is ready
