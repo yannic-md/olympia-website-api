@@ -6,7 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,20 +33,22 @@ class ImportControllerIntegrationTest {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("athleteFirstName");
         headerRow.createCell(1).setCellValue("athleteLastName");
-        headerRow.createCell(2).setCellValue("rank");
-        headerRow.createCell(3).setCellValue("timeOrPoints");
-        headerRow.createCell(4).setCellValue("scoreType");
-        headerRow.createCell(5).setCellValue("medal");
-        
+        headerRow.createCell(2).setCellValue("sport");
+        headerRow.createCell(3).setCellValue("rank");
+        headerRow.createCell(4).setCellValue("timeOrPoints");
+        headerRow.createCell(5).setCellValue("scoreType");
+        headerRow.createCell(6).setCellValue("medal");
+
         // Create data row
         Row dataRow = sheet.createRow(1);
-        dataRow.createCell(0).setCellValue("Katie");
-        dataRow.createCell(1).setCellValue("Ledecky");
-        dataRow.createCell(2).setCellValue(1);
-        dataRow.createCell(3).setCellValue("3:59.34");
-        dataRow.createCell(4).setCellValue("TIME");
-        dataRow.createCell(5).setCellValue("GOLD");
-        
+        dataRow.createCell(0).setCellValue("Mikaela");
+        dataRow.createCell(1).setCellValue("Shiffrin");
+        dataRow.createCell(2).setCellValue("Alpine Skiing");
+        dataRow.createCell(3).setCellValue(1);
+        dataRow.createCell(4).setCellValue("1:31.88");
+        dataRow.createCell(5).setCellValue("TIME");
+        dataRow.createCell(6).setCellValue("GOLD");
+
         workbook.write(baos);
         workbook.close();
         

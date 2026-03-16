@@ -35,19 +35,21 @@ class ExcelParserTest {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("athleteFirstName");
         headerRow.createCell(1).setCellValue("athleteLastName");
-        headerRow.createCell(2).setCellValue("rank");
-        headerRow.createCell(3).setCellValue("timeOrPoints");
-        headerRow.createCell(4).setCellValue("scoreType");
-        headerRow.createCell(5).setCellValue("medal");
+        headerRow.createCell(2).setCellValue("sport");
+        headerRow.createCell(3).setCellValue("rank");
+        headerRow.createCell(4).setCellValue("timeOrPoints");
+        headerRow.createCell(5).setCellValue("scoreType");
+        headerRow.createCell(6).setCellValue("medal");
         
         // Create data row with string values
         Row dataRow = sheet.createRow(1);
         dataRow.createCell(0).setCellValue("Katie");
         dataRow.createCell(1).setCellValue("Ledecky");
-        dataRow.createCell(2).setCellValue(1);  // numeric rank
-        dataRow.createCell(3).setCellValue("3:59.34");  // string time
-        dataRow.createCell(4).setCellValue("TIME");
-        dataRow.createCell(5).setCellValue("GOLD");
+        dataRow.createCell(2).setCellValue("Speed Skating");
+        dataRow.createCell(3).setCellValue(1);  // numeric rank
+        dataRow.createCell(4).setCellValue("3:59.34");  // string time
+        dataRow.createCell(5).setCellValue("TIME");
+        dataRow.createCell(6).setCellValue("GOLD");
         
         workbook.write(baos);
         workbook.close();
@@ -70,6 +72,7 @@ class ExcelParserTest {
         ResultImportDto result = results.get(0);
         assertEquals("Katie", result.getAthleteFirstName());
         assertEquals("Ledecky", result.getAthleteLastName());
+        assertEquals("Speed Skating", result.getSport());
         assertEquals(1, result.getRank());
         assertEquals("3:59.34", result.getTimeOrPoints());
         assertEquals("TIME", result.getScoreType());
@@ -87,19 +90,21 @@ class ExcelParserTest {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("athleteFirstName");
         headerRow.createCell(1).setCellValue("athleteLastName");
-        headerRow.createCell(2).setCellValue("rank");
-        headerRow.createCell(3).setCellValue("timeOrPoints");
-        headerRow.createCell(4).setCellValue("scoreType");
-        headerRow.createCell(5).setCellValue("medal");
+        headerRow.createCell(2).setCellValue("sport");
+        headerRow.createCell(3).setCellValue("rank");
+        headerRow.createCell(4).setCellValue("timeOrPoints");
+        headerRow.createCell(5).setCellValue("scoreType");
+        headerRow.createCell(6).setCellValue("medal");
         
         // Create data row with numeric time (this was causing the original bug)
         Row dataRow = sheet.createRow(1);
         dataRow.createCell(0).setCellValue("Max");
         dataRow.createCell(1).setCellValue("Mustermann");
-        dataRow.createCell(2).setCellValue(2);
-        dataRow.createCell(3).setCellValue(4.016666);  // numeric instead of string!
-        dataRow.createCell(4).setCellValue("TIME");
-        dataRow.createCell(5).setCellValue("SILVER");
+        dataRow.createCell(2).setCellValue("Alpine Skiing");
+        dataRow.createCell(3).setCellValue(2);
+        dataRow.createCell(4).setCellValue(4.016666);  // numeric instead of string!
+        dataRow.createCell(5).setCellValue("TIME");
+        dataRow.createCell(6).setCellValue("SILVER");
         
         workbook.write(baos);
         workbook.close();
@@ -122,6 +127,7 @@ class ExcelParserTest {
         ResultImportDto result = results.get(0);
         assertEquals("Max", result.getAthleteFirstName());
         assertEquals("Mustermann", result.getAthleteLastName());
+        assertEquals("Alpine Skiing", result.getSport());
         assertEquals(2, result.getRank());
         // The numeric value should be converted to string
         assertNotNull(result.getTimeOrPoints());
@@ -141,17 +147,19 @@ class ExcelParserTest {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("athleteFirstName");
         headerRow.createCell(1).setCellValue("athleteLastName");
-        headerRow.createCell(2).setCellValue("rank");
-        headerRow.createCell(3).setCellValue("timeOrPoints");
-        headerRow.createCell(4).setCellValue("scoreType");
-        headerRow.createCell(5).setCellValue("medal");
+        headerRow.createCell(2).setCellValue("sport");
+        headerRow.createCell(3).setCellValue("rank");
+        headerRow.createCell(4).setCellValue("timeOrPoints");
+        headerRow.createCell(5).setCellValue("scoreType");
+        headerRow.createCell(6).setCellValue("medal");
         
         // Create data row without optional fields
         Row dataRow = sheet.createRow(1);
         dataRow.createCell(0).setCellValue("John");
         dataRow.createCell(1).setCellValue("Doe");
-        dataRow.createCell(2).setCellValue(3);
-        // Leave cells 3, 4, 5 empty - they should be null
+        dataRow.createCell(2).setCellValue("Figure Skating");
+        dataRow.createCell(3).setCellValue(3);
+        // Leave cells 4, 5, 6 empty - they should be null
         
         workbook.write(baos);
         workbook.close();
@@ -174,6 +182,7 @@ class ExcelParserTest {
         ResultImportDto result = results.get(0);
         assertEquals("John", result.getAthleteFirstName());
         assertEquals("Doe", result.getAthleteLastName());
+        assertEquals("Figure Skating", result.getSport());
         assertEquals(3, result.getRank());
         assertNull(result.getTimeOrPoints());  // Should be null, not throw exception
         assertNull(result.getScoreType());
@@ -191,16 +200,18 @@ class ExcelParserTest {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("athleteFirstName");
         headerRow.createCell(1).setCellValue("athleteLastName");
-        headerRow.createCell(2).setCellValue("rank");
-        headerRow.createCell(3).setCellValue("timeOrPoints");
-        headerRow.createCell(4).setCellValue("scoreType");
-        headerRow.createCell(5).setCellValue("medal");
+        headerRow.createCell(2).setCellValue("sport");
+        headerRow.createCell(3).setCellValue("rank");
+        headerRow.createCell(4).setCellValue("timeOrPoints");
+        headerRow.createCell(5).setCellValue("scoreType");
+        headerRow.createCell(6).setCellValue("medal");
         
         // Create data row missing lastName
         Row dataRow = sheet.createRow(1);
         dataRow.createCell(0).setCellValue("Jane");
         // Missing lastName - should throw exception
-        dataRow.createCell(2).setCellValue(1);
+        dataRow.createCell(2).setCellValue("Biathlon");
+        dataRow.createCell(3).setCellValue(1);
         
         workbook.write(baos);
         workbook.close();

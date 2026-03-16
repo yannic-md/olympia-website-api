@@ -1,0 +1,11 @@
+athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
+Max,Mustermann,Alpine Skiing,1,1:23.45,TIME,GOLD
+Marie,Dupont,Biathlon,2,1:25.67,TIME,SILVER
+Erik,Hansen,Curling,3,8,WINS,BRONZE
+Anna,Svensson,Figure Skating,4,91.20,PTS,
+Katie,Ledecky,Speed Skating,1,3:59.34,TIME,GOLD
+Connor,Fields,Snowboarding,2,87.50,PTS,SILVER
+Sofia,Goggia,Alpine Skiing,1,1:32.03,TIME,GOLD
+Marcel,Hirscher,Alpine Skiing,2,1:33.45,TIME,SILVER
+
+

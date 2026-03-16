@@ -1,8 +1,8 @@
-Athlete_Firstname,Athlete_Lastname,Sport,Medal,Score
-TEST-Max,TEST-Mustermann,TEST-Skiing,GOLD,1:23.45
-TEST-Anna,TEST-Schmidt,TEST-Skiing,SILVER,1:25.67
-TEST-Pierre,TEST-Dubois,TEST-Skating,BRONZE,45.89
-TEST-Marie,TEST-Martin,TEST-Skating,GOLD,42.12
+athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
+TEST-Max,TEST-Mustermann,Alpine Skiing,1,1:23.45,TIME,GOLD
+TEST-Anna,TEST-Schmidt,Alpine Skiing,2,1:25.67,TIME,SILVER
+TEST-Pierre,TEST-Dubois,Figure Skating,3,45.89,PTS,BRONZE
+TEST-Marie,TEST-Martin,Figure Skating,1,42.12,PTS,GOLD
 TEST-Marco,TEST-Rossi,TEST-Swimming,SILVER,2:15.34
 TEST-Lucia,TEST-Ferrari,TEST-Swimming,BRONZE,2:18.56
 TEST-Carlos,TEST-Garcia,TEST-Biathlon,GOLD,1:45:23
