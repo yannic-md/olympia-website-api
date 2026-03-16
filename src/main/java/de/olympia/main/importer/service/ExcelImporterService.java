@@ -11,6 +11,7 @@ import de.olympia.main.importer.entity.ImportDetail;
 import de.olympia.main.importer.entity.ImportError;
 import de.olympia.main.importer.entity.ImportLog;
 import de.olympia.main.importer.exception.InvalidImportDataException;
+import de.olympia.main.importer.parser.CsvParser;
 import de.olympia.main.importer.parser.ExcelParser;
 import de.olympia.main.importer.repository.ImportDetailRepository;
 import de.olympia.main.importer.repository.ImportErrorRepository;
@@ -38,6 +39,7 @@ import java.util.Set;
 public class ExcelImporterService {
 
     private final ExcelParser excelParser;
+    private final CsvParser csvParser;
     private final CountryRepository countryRepository;
     private final AthleteRepository athleteRepository;
     private final ResultRepository resultRepository;
@@ -49,6 +51,7 @@ public class ExcelImporterService {
 
     public ExcelImporterService(
         ExcelParser excelParser,
+        CsvParser csvParser,
         CountryRepository countryRepository,
         AthleteRepository athleteRepository,
         ResultRepository resultRepository,
@@ -59,6 +62,7 @@ public class ExcelImporterService {
         UserRepository userRepository
     ) {
         this.excelParser = excelParser;
+        this.csvParser = csvParser;
         this.countryRepository = countryRepository;
         this.athleteRepository = athleteRepository;
         this.resultRepository = resultRepository;
@@ -78,7 +82,9 @@ public class ExcelImporterService {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "COUNTRIES", userId);
 
         try {
-            List<CountryImportDto> countries = excelParser.parseCountries(file);
+            List<CountryImportDto> countries = isCsvFile(file.getOriginalFilename())
+                    ? csvParser.parseCountries(file)
+                    : excelParser.parseCountries(file);
             importLog.setTotalRecords(countries.size());
             importLogRepository.save(importLog);
 
@@ -114,7 +120,9 @@ public class ExcelImporterService {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "ATHLETES", userId);
 
         try {
-            List<AthleteImportDto> athletes = excelParser.parseAthletes(file);
+            List<AthleteImportDto> athletes = isCsvFile(file.getOriginalFilename())
+                    ? csvParser.parseAthletes(file)
+                    : excelParser.parseAthletes(file);
             importLog.setTotalRecords(athletes.size());
             importLogRepository.save(importLog);
 
@@ -150,7 +158,9 @@ public class ExcelImporterService {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "RESULTS", userId);
 
         try {
-            List<ResultImportDto> results = excelParser.parseResults(file);
+            List<ResultImportDto> results = isCsvFile(file.getOriginalFilename())
+                    ? csvParser.parseResults(file)
+                    : excelParser.parseResults(file);
             importLog.setTotalRecords(results.size());
             importLogRepository.save(importLog);
 
@@ -389,6 +399,13 @@ public class ExcelImporterService {
         }
 
         return importLog;
+    }
+
+    /**
+     * Check if the uploaded file is a CSV file
+     */
+    private boolean isCsvFile(String filename) {
+        return filename != null && filename.toLowerCase().endsWith(".csv");
     }
 
     /**

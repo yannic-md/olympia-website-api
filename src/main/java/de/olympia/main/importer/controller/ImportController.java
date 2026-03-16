@@ -46,11 +46,11 @@ public class ImportController {
                     .build());
         }
 
-        if (!isValidExcelFile(file.getOriginalFilename())) {
+        if (!isValidImportFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest()
                 .body(ImportResponseDto.builder()
                     .status("FAILED")
-                    .message("Only .xlsx and .xls files are supported")
+                    .message("Only .xlsx, .xls and .csv files are supported")
                     .build());
         }
 
@@ -90,11 +90,11 @@ public class ImportController {
                     .build());
         }
 
-        if (!isValidExcelFile(file.getOriginalFilename())) {
+        if (!isValidImportFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest()
                 .body(ImportResponseDto.builder()
                     .status("FAILED")
-                    .message("Only .xlsx and .xls files are supported")
+                    .message("Only .xlsx, .xls and .csv files are supported")
                     .build());
         }
 
@@ -134,11 +134,11 @@ public class ImportController {
                     .build());
         }
 
-        if (!isValidExcelFile(file.getOriginalFilename())) {
+        if (!isValidImportFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest()
                 .body(ImportResponseDto.builder()
                     .status("FAILED")
-                    .message("Only .xlsx and .xls files are supported")
+                    .message("Only .xlsx, .xls and .csv files are supported")
                     .build());
         }
 
@@ -205,13 +205,14 @@ public class ImportController {
     }
 
     /**
-     * Validate if file is Excel format
+     * Validate if file is a supported import format (Excel or CSV)
      */
-    private boolean isValidExcelFile(String filename) {
+    private boolean isValidImportFile(String filename) {
         if (filename == null) {
             return false;
         }
-        return filename.endsWith(".xlsx") || filename.endsWith(".xls");
+        String lower = filename.toLowerCase();
+        return lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".csv");
     }
 }
 
