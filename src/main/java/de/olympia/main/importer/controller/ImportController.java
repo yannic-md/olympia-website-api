@@ -46,11 +46,11 @@ public class ImportController {
                     .build());
         }
 
-        if (!isValidFile(file.getOriginalFilename())) {
+        if (!isValidExcelFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest()
                 .body(ImportResponseDto.builder()
                     .status("FAILED")
-                    .message("Only .xlsx, .xls and .csv files are supported")
+                    .message("Only .xlsx and .xls files are supported")
                     .build());
         }
 
@@ -90,11 +90,11 @@ public class ImportController {
                     .build());
         }
 
-        if (!isValidFile(file.getOriginalFilename())) {
+        if (!isValidExcelFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest()
                 .body(ImportResponseDto.builder()
                     .status("FAILED")
-                    .message("Only .xlsx, .xls and .csv files are supported")
+                    .message("Only .xlsx and .xls files are supported")
                     .build());
         }
 
@@ -134,11 +134,11 @@ public class ImportController {
                     .build());
         }
 
-        if (!isValidFile(file.getOriginalFilename())) {
+        if (!isValidExcelFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest()
                 .body(ImportResponseDto.builder()
                     .status("FAILED")
-                    .message("Only .xlsx, .xls and .csv files are supported")
+                    .message("Only .xlsx and .xls files are supported")
                     .build());
         }
 
@@ -205,13 +205,13 @@ public class ImportController {
     }
 
     /**
-     * Validate if file is Excel or CSV format
+     * Validate if file is Excel format
      */
-    private boolean isValidFile(String filename) {
+    private boolean isValidExcelFile(String filename) {
         if (filename == null) {
             return false;
         }
-        return filename.endsWith(".xlsx") || filename.endsWith(".xls") || filename.endsWith(".csv");
+        return filename.endsWith(".xlsx") || filename.endsWith(".xls");
     }
 }
 

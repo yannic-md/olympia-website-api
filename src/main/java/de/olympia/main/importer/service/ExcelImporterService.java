@@ -3,7 +3,6 @@ package de.olympia.main.importer.service;
 import de.olympia.main.entity.Athlete;
 import de.olympia.main.entity.Country;
 import de.olympia.main.entity.Result;
-import de.olympia.main.entity.Sports;
 import de.olympia.main.entity.User;
 import de.olympia.main.importer.dto.AthleteImportDto;
 import de.olympia.main.importer.dto.CountryImportDto;
@@ -19,7 +18,6 @@ import de.olympia.main.importer.repository.ImportLogRepository;
 import de.olympia.main.repository.AthleteRepository;
 import de.olympia.main.repository.CountryRepository;
 import de.olympia.main.repository.ResultRepository;
-import de.olympia.main.repository.SportsRepository;
 import de.olympia.main.repository.UserRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -43,7 +41,6 @@ public class ExcelImporterService {
     private final CountryRepository countryRepository;
     private final AthleteRepository athleteRepository;
     private final ResultRepository resultRepository;
-    private final SportsRepository sportsRepository;
     private final ImportLogRepository importLogRepository;
     private final ImportErrorRepository importErrorRepository;
     private final ImportDetailRepository importDetailRepository;
@@ -55,7 +52,6 @@ public class ExcelImporterService {
         CountryRepository countryRepository,
         AthleteRepository athleteRepository,
         ResultRepository resultRepository,
-        SportsRepository sportsRepository,
         ImportLogRepository importLogRepository,
         ImportErrorRepository importErrorRepository,
         ImportDetailRepository importDetailRepository,
@@ -66,7 +62,6 @@ public class ExcelImporterService {
         this.countryRepository = countryRepository;
         this.athleteRepository = athleteRepository;
         this.resultRepository = resultRepository;
-        this.sportsRepository = sportsRepository;
         this.importLogRepository = importLogRepository;
         this.importErrorRepository = importErrorRepository;
         this.importDetailRepository = importDetailRepository;
@@ -81,7 +76,6 @@ public class ExcelImporterService {
     @Transactional
     public ImportLog importCountries(MultipartFile file, Long userId) {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "COUNTRIES", userId);
-        importLogRepository.save(importLog); // immer zuerst speichern, damit die ID für Fehlertracks vorhanden ist
 
         try {
             List<CountryImportDto> countries = excelParser.parseCountries(file);
@@ -118,7 +112,6 @@ public class ExcelImporterService {
     @Transactional
     public ImportLog importAthletes(MultipartFile file, Long userId) {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "ATHLETES", userId);
-        importLogRepository.save(importLog); // immer zuerst speichern
 
         try {
             List<AthleteImportDto> athletes = excelParser.parseAthletes(file);
@@ -155,7 +148,6 @@ public class ExcelImporterService {
     @Transactional
     public ImportLog importResults(MultipartFile file, Long userId) {
         ImportLog importLog = createImportLog(file.getOriginalFilename(), "RESULTS", userId);
-        importLogRepository.save(importLog); // immer zuerst speichern
 
         try {
             List<ResultImportDto> results = excelParser.parseResults(file);
@@ -348,24 +340,9 @@ public class ExcelImporterService {
                     );
                 }
 
-                final int currentRowNum = rowNum;
-
-                Sports sport = sportsRepository.findByNameIgnoreCase(dto.getSport())
-                    .orElseThrow(() -> new InvalidImportDataException(
-                        "Sport not found: " + dto.getSport(),
-                        "SPORT_NOT_FOUND",
-                        currentRowNum,
-                        "sport"
-                    ));
-
-                Optional<Result> existing = resultRepository.findBySportsIdAndAthleteId(sport.getId(), athlete.get().getId());
-                Result result = existing.orElseGet(Result::new);
-                ImportDetail.ImportAction action = existing.isPresent()
-                    ? ImportDetail.ImportAction.UPDATE
-                    : ImportDetail.ImportAction.INSERT;
-
+                // Create and save new result
+                Result result = new Result();
                 result.setAthlete(athlete.get());
-                result.setSports(sport);
                 result.setRank(dto.getRank());
                 result.setTimeOrPoints(dto.getTimeOrPoints());
                 if (dto.getScoreType() != null) {
@@ -379,8 +356,6 @@ public class ExcelImporterService {
                             "scoreType"
                         );
                     }
-                } else if (sport.getScoreType() != null) {
-                    result.setScoreType(Result.ScoreType.valueOf(sport.getScoreType().name()));
                 }
                 if (dto.getMedal() != null) {
                     try {
@@ -398,9 +373,8 @@ public class ExcelImporterService {
                 Result saved = resultRepository.save(result);
 
                 importLog.setSuccessfulRecords(importLog.getSuccessfulRecords() + 1);
-                recordImportDetail(importLog, "RESULT", saved.getId(), action);
-                log.info("Imported result for athlete: {} {} in sport {} ({})",
-                    dto.getAthleteFirstName(), dto.getAthleteLastName(), dto.getSport(), action);
+                recordImportDetail(importLog, "RESULT", saved.getId(), ImportDetail.ImportAction.INSERT);
+                log.info("Imported result for athlete: {} {}", dto.getAthleteFirstName(), dto.getAthleteLastName());
 
             } catch (InvalidImportDataException e) {
                 importLog.setFailedRecords(importLog.getFailedRecords() + 1);
