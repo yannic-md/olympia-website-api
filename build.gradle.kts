@@ -48,6 +48,7 @@ dependencies {
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
+	testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")
@@ -60,3 +61,12 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+tasks.register<JavaExec>("createTestFiles") {
+	group = "test-data"
+	description = "Generates Excel test import files in test-excel-files/"
+	classpath = sourceSets["main"].runtimeClasspath
+	mainClass.set("de.olympia.main.GenerateTestFiles")
+	workingDir = projectDir
+}
+
