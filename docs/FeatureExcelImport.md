@@ -78,7 +78,7 @@ Importiert Athleten aus einer Excel-Datei. Länder müssen vorher existieren (Zu
 ### 3. Ergebnisse importieren
 **POST** `/api/imports/results`
 
-Importiert Turnier-Ergebnisse aus einer Excel- oder CSV-Datei. Athleten und Sportarten müssen vorher existieren. Die Zuordnung erfolgt über Vor-/Nachname des Athleten und den Sportnamen.
+Importiert Turnier-Ergebnisse aus einer Excel-Datei. Athleten müssen vorher existieren (Zuordnung über Vor- und Nachname).
 
 **Authentifizierung:** Erforderlich (alle authentifizierten Benutzer)
 
@@ -88,17 +88,15 @@ Importiert Turnier-Ergebnisse aus einer Excel- oder CSV-Datei. Athleten und Spor
 
 **Excel-Format (Spalten):**
 
-| Spalte A         | Spalte B         | Spalte C | Spalte D | Spalte E     | Spalte F  | Spalte G |
-|------------------|------------------|----------|----------|--------------|-----------|----------|
-| athleteFirstName | athleteLastName  | sport    | rank     | timeOrPoints | scoreType | medal    |
-| Mikaela          | Shiffrin         | Alpine Skiing | 1   | 1:31.88      | TIME      | GOLD     |
-| Nathan           | Chen             | Figure Skating | 1  | 314.56       | PTS       | GOLD     |
+| Spalte A         | Spalte B         | Spalte C | Spalte D     | Spalte E  | Spalte F |
+|------------------|------------------|----------|--------------|-----------|----------|
+| athleteFirstName | athleteLastName  | rank     | timeOrPoints | scoreType | medal    |
+| Katie            | Ledecky          | 1        | 3:59.34      | TIME      | GOLD     |
+| Max              | Mustermann       | 2        | 4:01.12      | TIME      | SILVER   |
 
 **Medaillen-Werte:** `GOLD`, `SILVER`, `BRONZE` oder leer
 
 **ScoreType-Werte:** `PTS`, `WINS`, `TIME` oder leer
-
-**Sport-Werte:** müssen exakt einem vorhandenen Eintrag in der Tabelle `sports.name` entsprechen, z. B. `Alpine Skiing`, `Biathlon`, `Figure Skating`, `Curling`.
 
 **Response (200 OK):**
 ```json
@@ -178,7 +176,6 @@ Fehler auf Zeilenebene werden pro Datensatz erfasst und im Response zurückgegeb
 | `DUPLICATE_ENTRY`       | Datensatz existiert bereits               |
 | `COUNTRY_NOT_FOUND`     | Ländercode nicht in Datenbank gefunden     |
 | `ATHLETE_NOT_FOUND`     | Athlet nicht in Datenbank gefunden         |
-| `SPORT_NOT_FOUND`       | Sportname nicht in Datenbank gefunden      |
 | `USER_NOT_FOUND`        | Benutzer-ID nicht gefunden                |
 | `INVALID_MEDAL`         | Ungültiger Medaillen-Wert                 |
 | `MISSING_REQUIRED_FIELD`| Pflichtfeld ist leer                      |
@@ -194,7 +191,7 @@ Fehler auf Zeilenebene werden pro Datensatz erfasst und im Response zurückgegeb
 
 - **Länder:** Wenn ein Ländercode bereits existiert, wird die Zeile übersprungen (SKIP)
 - **Athleten:** Wenn Vor- und Nachname bereits existieren, wird die Zeile übersprungen (SKIP)
-- **Ergebnisse:** Werden pro Kombination aus **Sport + Athlet** importiert. Existiert für diese Kombination bereits ein Eintrag, wird er aktualisiert (UPDATE), sonst neu angelegt (INSERT).
+- **Ergebnisse:** Werden immer eingefügt (kein Duplikat-Check)
 
 ---
 
@@ -211,7 +208,6 @@ Die Implementierung folgt der klassischen Layer-Architektur:
    - Enthält die Import-Logik für Länder, Athleten und Ergebnisse
    - Validiert jeden Datensatz einzeln mit Bean Validation
    - Prüft auf Duplikate und fehlende Referenzen
-   - Löst bei Ergebnissen zusätzlich den Sportnamen gegen die Tabelle `sports` auf
    - Protokolliert Erfolge und Fehler
 
 3. **parser** — `ExcelParser.java`

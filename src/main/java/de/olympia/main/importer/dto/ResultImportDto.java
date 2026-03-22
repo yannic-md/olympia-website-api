@@ -1,6 +1,6 @@
 package de.olympia.main.importer.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,14 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResultImportDto {
 
-    @NotBlank(message = "Athlete first name is required")
+    @NotNull(message = "Athlete first name is required")
     private String athleteFirstName;
 
-    @NotBlank(message = "Athlete last name is required")
+    @NotNull(message = "Athlete last name is required")
     private String athleteLastName;
-
-    @NotBlank(message = "Sport is required")
-    private String sport;
 
     @Positive(message = "Rank must be a positive number")
     private Integer rank;
