@@ -1,0 +1,8 @@
+athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
+Michael,Phelps,Alpine Skiing,1,1:31.88,TIME,GOLD
+,Phelps,Biathlon,2,50:00.00,TIME,SILVER
+Anna,,Figure Skating,1,300.00,PTS,GOLD
+Usain,Bolt,Invalid Sport,1,9.58,TIME,GOLD
+Fictional,Athlete,Curling,1,10,WINS,GOLD
+Sophie,Marceau,Alpine Skiing,0,1:50.00,TIME,PLATINUM
+Jean,Dupont,Ski Jumping,-1,150.5,PTS,GOLD
