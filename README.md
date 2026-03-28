@@ -28,6 +28,7 @@
    - [Requirements](#requirements)
    - [Default Login-Data](#default-login-data)
    - [Start the project](#start-the-project)
+- [📥 Import Documentation](#-import-documentation)
 - [⚙️ Explanation of the Code-Structure](#%EF%B8%8F-explanation-of-the-code-structure)
     - [1. General](#1-general)
     - [2. Flyway](#2-flyway)
@@ -85,6 +86,22 @@ The project is well documented and was created as part of an assignment during t
 5. The API is now listening for HTTP requests on http://localhost:8080.
 
 <strong>You only need to do that once. From now on, you can start/stop the project in the "Docker Desktop" application.</strong>
+
+## 📥 Import Documentation
+
+› For detailed information on how to import data (Countries, Athletes, and Results) into the system, please refer to our comprehensive import documentation:
+
+- **[README-Import.md](./docs/README-Import.md)** - 📑 Overview and Quick Links to all import guides
+- **[ImportDateiFormat.md](./docs/ImportDateiFormat.md)** - 📋 Complete file format specification with detailed requirements for each data type
+- **[ImportCheckliste.md](./docs/ImportCheckliste.md)** - ✅ Quick reference checklists for data validation before import
+- **[ImportBeispiele.md](./docs/ImportBeispiele.md)** - 📚 Practical examples, best practices, and real-world scenarios
+- **[FeatureExcelImport.md](./docs/FeatureExcelImport.md)** - 🔧 Technical API details and implementation information
+
+**Quick Start:** The import process requires three steps in this order:
+1. 🌍 Import Countries first
+2. 🏃 Import Athletes second (requires Countries)
+3. 🏅 Import Results last (requires Athletes)
+
 ## ⚙️ Explanation of the Code-Structure
 
 ### 1. General
