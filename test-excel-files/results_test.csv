@@ -1,0 +1,10 @@
+athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
+Sofia,Goggia,Alpine Skiing,1,1:32.03,TIME,GOLD
+Mikaela,Shiffrin,Alpine Skiing,2,1:32.47,TIME,SILVER
+Petra,Vlhova,Alpine Skiing,3,1:32.88,TIME,BRONZE
+Johannes,Boe,Biathlon,1,23:45.2,TIME,GOLD
+Marte,Roeiseland,Biathlon,2,20:23.1,TIME,SILVER
+Nathan,Chen,Figure Skating,1,314.56,PTS,GOLD
+Yuzuru,Hanyu,Figure Skating,2,312.45,PTS,SILVER
+Ireen,Wust,Speed Skating,1,1:43.50,TIME,GOLD
+

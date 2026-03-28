@@ -1,7 +1,7 @@
-# Excel Import API Dokumentation
+# Excel/CSV Import API Dokumentation
 
 ## Übersicht
-Diese API bietet Endpunkte zum Importieren von Daten aus Excel-Dateien (`.xlsx` und `.xls`). Es können **Länder**, **Athleten** und **Ergebnisse** importiert werden. Jeder Import wird protokolliert und Fehler werden auf Zeilenebene erfasst.
+Diese API bietet Endpunkte zum Importieren von Daten aus Excel- und CSV-Dateien (`.xlsx`, `.xls`, `.csv`). Es können **Länder**, **Athleten** und **Ergebnisse** importiert werden. Jeder Import wird protokolliert und Fehler werden auf Zeilenebene erfasst.
 
 ## Endpunkte
 
@@ -13,7 +13,7 @@ Importiert Länder aus einer Excel-Datei.
 **Authentifizierung:** Erforderlich (alle authentifizierten Benutzer)
 
 **Request Parameter:**
-- `file` (MultipartFile, erforderlich) — Excel-Datei (`.xlsx` oder `.xls`)
+- `file` (MultipartFile, erforderlich) — Import-Datei (`.xlsx`, `.xls` oder `.csv`)
 - `userId` (Long, optional) — Benutzer-ID des Importierenden (Standard: `1`)
 
 **Excel-Format (Spalten):**
@@ -48,7 +48,7 @@ Importiert Athleten aus einer Excel-Datei. Länder müssen vorher existieren (Zu
 **Authentifizierung:** Erforderlich (alle authentifizierten Benutzer)
 
 **Request Parameter:**
-- `file` (MultipartFile, erforderlich) — Excel-Datei (`.xlsx` oder `.xls`)
+- `file` (MultipartFile, erforderlich) — Import-Datei (`.xlsx`, `.xls` oder `.csv`)
 - `userId` (Long, optional) — Benutzer-ID des Importierenden (Standard: `1`)
 
 **Excel-Format (Spalten):**
@@ -78,27 +78,25 @@ Importiert Athleten aus einer Excel-Datei. Länder müssen vorher existieren (Zu
 ### 3. Ergebnisse importieren
 **POST** `/api/imports/results`
 
-Importiert Turnier-Ergebnisse aus einer Excel- oder CSV-Datei. Athleten und Sportarten müssen vorher existieren. Die Zuordnung erfolgt über Vor-/Nachname des Athleten und den Sportnamen.
+Importiert Turnier-Ergebnisse aus einer Excel-Datei. Athleten müssen vorher existieren (Zuordnung über Vor- und Nachname).
 
 **Authentifizierung:** Erforderlich (alle authentifizierten Benutzer)
 
 **Request Parameter:**
-- `file` (MultipartFile, erforderlich) — Excel-Datei (`.xlsx` oder `.xls`)
+- `file` (MultipartFile, erforderlich) — Import-Datei (`.xlsx`, `.xls` oder `.csv`)
 - `userId` (Long, optional) — Benutzer-ID des Importierenden (Standard: `1`)
 
 **Excel-Format (Spalten):**
 
-| Spalte A         | Spalte B         | Spalte C | Spalte D | Spalte E     | Spalte F  | Spalte G |
-|------------------|------------------|----------|----------|--------------|-----------|----------|
-| athleteFirstName | athleteLastName  | sport    | rank     | timeOrPoints | scoreType | medal    |
-| Mikaela          | Shiffrin         | Alpine Skiing | 1   | 1:31.88      | TIME      | GOLD     |
-| Nathan           | Chen             | Figure Skating | 1  | 314.56       | PTS       | GOLD     |
+| Spalte A         | Spalte B         | Spalte C | Spalte D     | Spalte E  | Spalte F |
+|------------------|------------------|----------|--------------|-----------|----------|
+| athleteFirstName | athleteLastName  | rank     | timeOrPoints | scoreType | medal    |
+| Katie            | Ledecky          | 1        | 3:59.34      | TIME      | GOLD     |
+| Max              | Mustermann       | 2        | 4:01.12      | TIME      | SILVER   |
 
 **Medaillen-Werte:** `GOLD`, `SILVER`, `BRONZE` oder leer
 
 **ScoreType-Werte:** `PTS`, `WINS`, `TIME` oder leer
-
-**Sport-Werte:** müssen exakt einem vorhandenen Eintrag in der Tabelle `sports.name` entsprechen, z. B. `Alpine Skiing`, `Biathlon`, `Figure Skating`, `Curling`.
 
 **Response (200 OK):**
 ```json
@@ -129,11 +127,11 @@ Ungültige Dateien werden sofort abgelehnt:
 }
 ```
 
-- **Falsches Format (nicht `.xlsx`/`.xls`):**
+- **Falsches Format (nicht `.xlsx`/`.xls`/`.csv`):**
 ```json
 {
   "status": "FAILED",
-  "message": "Only .xlsx and .xls files are supported"
+  "message": "Only .xlsx, .xls and .csv files are supported"
 }
 ```
 
@@ -178,23 +176,56 @@ Fehler auf Zeilenebene werden pro Datensatz erfasst und im Response zurückgegeb
 | `DUPLICATE_ENTRY`       | Datensatz existiert bereits               |
 | `COUNTRY_NOT_FOUND`     | Ländercode nicht in Datenbank gefunden     |
 | `ATHLETE_NOT_FOUND`     | Athlet nicht in Datenbank gefunden         |
-| `SPORT_NOT_FOUND`       | Sportname nicht in Datenbank gefunden      |
 | `USER_NOT_FOUND`        | Benutzer-ID nicht gefunden                |
 | `INVALID_MEDAL`         | Ungültiger Medaillen-Wert                 |
 | `MISSING_REQUIRED_FIELD`| Pflichtfeld ist leer                      |
 | `INVALID_CELL_TYPE`     | Falscher Zelltyp in Excel                 |
 | `INVALID_NUMBER_FORMAT` | Ungültiges Zahlenformat                   |
 | `EMPTY_SHEET`           | Excel-Datei enthält kein Sheet            |
-| `UNSUPPORTED_FORMAT`    | Datei ist weder `.xlsx` noch `.xls`       |
+| `UNSUPPORTED_FORMAT`    | Datei ist weder `.xlsx`, `.xls` noch `.csv` |
 | `PROCESSING_ERROR`      | Allgemeiner Verarbeitungsfehler           |
 
 ---
 
-## Duplikat-Verhalten
+## Format-Anforderungen
+
+### CSV Format
+- **Header-Zeile erforderlich** - Die erste Zeile muss die Spaltennamen enthalten
+- **Komma-getrennt** - RFC 4180 Standard
+- **Whitespace trimming** - Führende/nachfolgende Leerzeichen werden automatisch entfernt
+- **Case-sensitive Spaltennamen** - Exakt wie in den Beispielen unten
+
+**Countries CSV:**
+```
+code,name
+USA,United States
+GER,Germany
+```
+
+**Athletes CSV:**
+```
+firstName,lastName,countryCode
+Katie,Ledecky,USA
+Max,Mustermann,GER
+```
+
+**Results CSV:**
+```
+athleteFirstName,athleteLastName,rank,timeOrPoints,scoreType,medal
+Katie,Ledecky,1,3:59.34,TIME,GOLD
+Max,Mustermann,2,4:01.12,TIME,SILVER
+```
+
+### Excel Format
+- **Header in erster Zeile** - Wird übersprungen
+- **Unterstützte Formate** - `.xlsx` (neuestes) und `.xls` (legacy)
+- **Spalten-Reihenfolge** - Exakt wie in den API-Beispielen oben
+
+---
 
 - **Länder:** Wenn ein Ländercode bereits existiert, wird die Zeile übersprungen (SKIP)
 - **Athleten:** Wenn Vor- und Nachname bereits existieren, wird die Zeile übersprungen (SKIP)
-- **Ergebnisse:** Werden pro Kombination aus **Sport + Athlet** importiert. Existiert für diese Kombination bereits ein Eintrag, wird er aktualisiert (UPDATE), sonst neu angelegt (INSERT).
+- **Ergebnisse:** Werden immer eingefügt (kein Duplikat-Check)
 
 ---
 
@@ -211,12 +242,11 @@ Die Implementierung folgt der klassischen Layer-Architektur:
    - Enthält die Import-Logik für Länder, Athleten und Ergebnisse
    - Validiert jeden Datensatz einzeln mit Bean Validation
    - Prüft auf Duplikate und fehlende Referenzen
-   - Löst bei Ergebnissen zusätzlich den Sportnamen gegen die Tabelle `sports` auf
    - Protokolliert Erfolge und Fehler
 
 3. **parser** — `ExcelParser.java`
-   - Liest Excel-Dateien mit Apache POI
-   - Unterstützt `.xlsx` (XSSF) und `.xls` (HSSF)
+   - Liest Excel-Dateien mit Apache POI und CSV-Dateien mit Commons CSV
+   - Unterstützt `.xlsx` (XSSF), `.xls` (HSSF) und `.csv`
    - Konvertiert Zeilen in DTOs
    - Erste Zeile wird als Header übersprungen
 
@@ -314,22 +344,55 @@ curl -X POST http://localhost:8080/api/imports/results \
   -F "file=@results.xlsx"
 ```
 
-### Test 4: Ungültige Datei (falsches Format)
+### Test 4: CSV Datei importieren (Länder)
 ```bash
 curl -X POST http://localhost:8080/api/imports/countries \
   -u admin:adminpwd \
-  -F "file=@data.csv"
+  -F "file=@countries.csv"
+```
+
+**Erwartete Response (200 OK):**
+```json
+{
+  "importLogId": 4,
+  "status": "COMPLETED",
+  "importType": "COUNTRIES",
+  "filename": "countries.csv",
+  "totalRecords": 2,
+  "successfulRecords": 2,
+  "failedRecords": 0,
+  "message": "Import completed. Success: 2, Failed: 0"
+}
+```
+
+**CSV Format Anforderungen:**
+- Header-Zeile erforderlich (wird übersprungen)
+- Komma-getrennt (RFC 4180)
+- Spaltennamen (case-sensitive): `code`, `name`
+
+Beispiel CSV:
+```
+code,name
+USA,United States
+GER,Germany
+```
+
+### Test 5: Ungültige Datei (falsches Format)
+```bash
+curl -X POST http://localhost:8080/api/imports/countries \
+  -u admin:adminpwd \
+  -F "file=@data.txt"
 ```
 
 **Erwartete Response (400 Bad Request):**
 ```json
 {
   "status": "FAILED",
-  "message": "Only .xlsx and .xls files are supported"
+  "message": "Only .xlsx, .xls and .csv files are supported"
 }
 ```
 
-### Test 5: Import mit bestimmter User-ID
+### Test 6: Import mit bestimmter User-ID
 ```bash
 curl -X POST http://localhost:8080/api/imports/countries \
   -u admin:adminpwd \

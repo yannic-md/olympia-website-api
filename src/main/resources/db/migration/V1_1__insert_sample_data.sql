@@ -1,9 +1,9 @@
-INSERT IGNORE INTO users (id, username, password_hash, role, email) VALUES
+INSERT INTO users (id, username, password_hash, role, email) VALUES
 (1, 'admin', '$2a$12$PHxCrCaCIaKBv8uY8.H4M.OvA0wNY3jjMenKYmZIFrFBTNRZ.p4kO', 'ADMIN', 'admin@example.com'),
 (2, 'judge1', '$2a$12$QwMbgi/l1GL0MCRVwXL/U.0/MfV41FUQesyslrzTXbg3shSBV.y7q', 'JUDGE', 'judge1@example.com'),
 (3, 'judge2', '$2a$12$ZJPS84EyrxU6CNhWWNCok.zFhqU.CR62voW9G08uGkDmwWKDN/reC', 'JUDGE', 'judge2@example.com');
 
-INSERT IGNORE INTO countries (id, code, name) VALUES
+INSERT INTO countries (id, code, name) VALUES
 (1, 'USA', 'United States'),
 (2, 'GER', 'Germany'),
 (3, 'FRA', 'France'),
@@ -25,7 +25,7 @@ INSERT IGNORE INTO countries (id, code, name) VALUES
 (19, 'ESP', 'Spain'),
 (20, 'AUS', 'Australia');
 
-INSERT IGNORE INTO sports (id, name) VALUES
+INSERT INTO sports (id, name) VALUES
 (1, 'Alpine Skiing'),
 (2, 'Biathlon'),
 (3, 'Cross-Country Skiing'),
@@ -42,7 +42,7 @@ INSERT IGNORE INTO sports (id, name) VALUES
 (14, 'Skeleton'),
 (15, 'Luge');
 
-INSERT IGNORE INTO athletes (id, first_name, last_name, country_id) VALUES
+INSERT INTO athletes (id, first_name, last_name, country_id) VALUES
 -- Alpine Skiing
 (1, 'Mikaela', 'Shiffrin', 1),
 (2, 'Marco', 'Odermatt', 8),
@@ -122,7 +122,7 @@ INSERT IGNORE INTO athletes (id, first_name, last_name, country_id) VALUES
 (63, 'Natalie', 'Geisenberger', 2),
 (64, 'Julia', 'Taubitz', 2);
 
-INSERT IGNORE INTO results (id, event_id, athlete_id, rank, time_or_points, medal, created_by) VALUES
+INSERT INTO results (id, event_id, athlete_id, rank, time_or_points, medal, created_by) VALUES
 -- Alpine Skiing - Downhill Women
 (1, 1, 5, 1, '1:32.03', 'GOLD', 2),
 (2, 1, 1, 2, '1:32.47', 'SILVER', 2),
@@ -226,11 +226,13 @@ INSERT IGNORE INTO results (id, event_id, athlete_id, rank, time_or_points, meda
 (75, 5, 18, 2, '25:01.2', 'SILVER', 3),
 (76, 5, 17, 3, '25:18.7', 'BRONZE', 3);
 
-INSERT IGNORE INTO imports (id, filename, imported_by) VALUES
+INSERT INTO imports (id, filename, imported_by) VALUES
 (1, 'athletes_import_2026.csv', 2),
 (2, 'results_import_2026.csv', 3);
 
-INSERT IGNORE INTO login_logs (id, user_id, ip_address) VALUES
+INSERT INTO login_logs (id, user_id, ip_address) VALUES
 (1, 1, '192.0.2.1'),
 (2, 2, '198.51.100.5'),
 (3, 3, '203.0.113.10');
+
+

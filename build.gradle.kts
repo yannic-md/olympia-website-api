@@ -43,30 +43,26 @@ dependencies {
 	implementation("org.apache.poi:poi-ooxml:5.2.5")
 	// CSV parsing
 	implementation("org.apache.commons:commons-csv:1.10.0")
+	// H2 Database for local development
+	runtimeOnly("com.h2database:h2")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
-	testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-jersey-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-security-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.mockito:mockito-core")
+	testImplementation("org.mockito:mockito-junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testRuntimeOnly("com.h2database:h2")
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
-
-tasks.register<JavaExec>("createTestFiles") {
-	group = "test-data"
-	description = "Generates Excel test import files in test-excel-files/"
-	classpath = sourceSets["main"].runtimeClasspath
-	mainClass.set("de.olympia.main.GenerateTestFiles")
-	workingDir = projectDir
-}
-

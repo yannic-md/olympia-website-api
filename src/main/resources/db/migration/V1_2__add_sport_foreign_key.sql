@@ -3,3 +3,5 @@ ALTER TABLE results
 ADD CONSTRAINT fk_results_sport
 FOREIGN KEY (event_id) REFERENCES sports(id) ON DELETE CASCADE;
 
+
+

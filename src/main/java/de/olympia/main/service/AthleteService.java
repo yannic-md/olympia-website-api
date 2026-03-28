@@ -64,8 +64,20 @@ public class AthleteService {
     }
 
     /**
-     * Creates Result entries for a newly created athlete based on the request data.
-     * Creates one Result per medal and an additional one for bestTime if no medal result exists yet.
+     * Creates initial Result entries for a newly created athlete based on the request data.
+     * 
+     * This method:
+     * 1. Resolves the sport entity by name (case-insensitive), may be null
+     * 2. Creates one Result row per medal (gold, silver, bronze) with the given sport
+     * 3. Applies bestTime only to the FIRST result created (bestTimeSet flag ensures this)
+     * 4. If medals are created but no bestTime is available, creates one additional result without medal
+     * 5. If no medals are created but bestTime is provided, creates a single result with bestTime
+     *
+     * The bestTime is only stored once to avoid redundant duplication across multiple results.
+     * This is an optimization to keep the database lean for athletes with multiple medals.
+     *
+     * @param athlete The newly saved athlete entity to create results for
+     * @param request The creation request containing medal counts, bestTime, sport name, and scoreType
      */
     private void createAthleteResults(Athlete athlete, CreateAthleteRequest request) {
         Sports sport = null;
@@ -78,18 +90,21 @@ public class AthleteService {
         int bronze = request.getBronzeMedals() != null ? request.getBronzeMedals() : 0;
         boolean bestTimeSet = false;
 
+        // Create gold medal results
         for (int i = 0; i < gold; i++) {
             Result r = buildResult(athlete, sport, Result.Medal.GOLD,
                     !bestTimeSet ? request.getBestTime() : null, request.getScoreType());
             resultRepository.save(r);
             bestTimeSet = true;
         }
+        // Create silver medal results
         for (int i = 0; i < silver; i++) {
             Result r = buildResult(athlete, sport, Result.Medal.SILVER,
                     !bestTimeSet ? request.getBestTime() : null, request.getScoreType());
             resultRepository.save(r);
             bestTimeSet = true;
         }
+        // Create bronze medal results
         for (int i = 0; i < bronze; i++) {
             Result r = buildResult(athlete, sport, Result.Medal.BRONZE,
                     !bestTimeSet ? request.getBestTime() : null, request.getScoreType());
@@ -106,8 +121,24 @@ public class AthleteService {
 
     /**
      * Builds a new Result entity with the given parameters.
-     * Appends the appropriate suffix ("pts", "wins") to timeOrPoints based on scoreType
-     * so the leaderboard display can translate it correctly.
+     * 
+     * This factory method creates a Result with:
+     * - Athlete and Sport references set
+     * - Medal type assigned
+     * - Score type assigned
+     * - timeOrPoints value formatted with appropriate unit suffix (via formatTimeOrPoints)
+     *
+     * The scoreType determines how bestTime will be formatted:
+     * - PTS: appends " pts" suffix
+     * - WINS: appends " wins" suffix
+     * - TIME or null: no suffix added
+     *
+     * @param athlete The athlete to associate with this result
+     * @param sport The sport to associate with this result (may be null)
+     * @param medal The medal type (GOLD, SILVER, BRONZE, or null for non-medal results)
+     * @param timeOrPoints The raw time/score value to store (formatted before persistence)
+     * @param scoreType The scoring method (PTS, WINS, TIME)
+     * @return A new Result entity (not yet persisted to database)
      */
     private Result buildResult(Athlete athlete, Sports sport, Result.Medal medal, String timeOrPoints, Result.ScoreType scoreType) {
         Result r = new Result();
@@ -122,9 +153,22 @@ public class AthleteService {
     }
 
     /**
-     * Appends the correct unit suffix to a score value based on its type.
-     * TIME values are stored as-is. PTS gets " pts" appended, WINS gets " wins".
-     * Already-suffixed values are not double-suffixed.
+     * Appends the correct unit suffix to a score value based on its scoreType.
+     * 
+     * Suffix mapping:
+     * - ScoreType.TIME: No suffix (value stored as-is, e.g., "12.34" or "1:23:45")
+     * - ScoreType.PTS: Appends " pts" suffix (e.g., "150 pts")
+     * - ScoreType.WINS: Appends " wins" suffix (e.g., "5 wins")
+     *
+     * Idempotent: Already-suffixed values are not double-suffixed.
+     * This prevents issues when formatTimeOrPoints is called multiple times on same value.
+     *
+     * The suffix is used by the leaderboard display to provide proper i18n
+     * translations and formatting without storing locale-specific information in the database.
+     *
+     * @param value The raw numeric or time string value (may be null or empty)
+     * @param scoreType The score type that determines the suffix (PTS, WINS, TIME, or null)
+     * @return The value with appropriate suffix appended, or original value if null/empty/TIME type
      */
     private String formatTimeOrPoints(String value, Result.ScoreType scoreType) {
         if (value == null || value.isEmpty()) return value;
@@ -178,10 +222,24 @@ public class AthleteService {
 
     /**
      * Updates the results of an athlete based on the requested medal counts and best time.
-     * Excess medal results are DELETED (not nulled) to prevent orphaned null-medal rows.
+     * 
+     * This complex method handles:
+     * 1. Resolving the sport from request or falling back to most recent result
+     * 2. Comparing current vs. target medal counts for each medal type
+     * 3. DELETING excess medal results when target < current (prevents null-medal orphans)
+     * 4. CREATING new medal results when target > current
+     * 5. UPDATING ALL existing medal results with new sport, scoreType, and bestTime
+     * 6. Properly formatting bestTime with unit suffixes based on scoreType
+     *
+     * The logic ensures:
+     * - No accumulation of null-medal rows from decreased medal counts
+     * - All medal results are kept in sync with the same sport and scoreType
+     * - bestTime is applied consistently across all medal results
+     * - event_id (sports) is always set even when medal count doesn't change
      *
      * @param athleteId The ID of the athlete whose results to update
      * @param request The update request containing new medal counts, best time and scoreType
+     * @throws RuntimeException if athlete not found
      */
     private void updateAthleteResults(Long athleteId, UpdateAthleteRequest request) {
         Athlete athlete = athleteRepository.findById(athleteId)
@@ -201,14 +259,17 @@ public class AthleteService {
             sport = sportsRepository.findByNameIgnoreCase(sportName).orElse(null);
         }
 
+        // Get current medal counts for each type
         int currentGold   = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.GOLD).size();
         int currentSilver = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.SILVER).size();
         int currentBronze = resultRepository.findByAthleteIdAndMedal(athleteId, Result.Medal.BRONZE).size();
 
+        // Get target medal counts from request, defaulting to current if not provided
         int targetGold   = request.getGoldMedals()   != null ? request.getGoldMedals()   : currentGold;
         int targetSilver = request.getSilverMedals()  != null ? request.getSilverMedals()  : currentSilver;
         int targetBronze = request.getBronzeMedals()  != null ? request.getBronzeMedals()  : currentBronze;
 
+        // Update each medal type to match target counts
         updateMedalType(athlete, sport, Result.Medal.GOLD,   currentGold,   targetGold,   request.getBestTime(), request.getScoreType());
         updateMedalType(athlete, sport, Result.Medal.SILVER, currentSilver, targetSilver, request.getBestTime(), request.getScoreType());
         updateMedalType(athlete, sport, Result.Medal.BRONZE, currentBronze, targetBronze, request.getBestTime(), request.getScoreType());
@@ -221,14 +282,17 @@ public class AthleteService {
         for (Result r : allResults) {
             boolean changed = false;
 
+            // Update sport if a new one was provided or resolved from results
             if (resolvedSport != null && !resolvedSport.equals(r.getSports())) {
                 r.setSports(resolvedSport);
                 changed = true;
             }
+            // Update scoreType if provided
             if (resolvedScoreType != null && !resolvedScoreType.equals(r.getScoreType())) {
                 r.setScoreType(resolvedScoreType);
                 changed = true;
             }
+            // Update bestTime with proper formatting based on scoreType
             if (request.getBestTime() != null && !request.getBestTime().isEmpty()) {
                 // Use the effective scoreType: from request if provided, else from the (possibly just updated) result
                 Result.ScoreType effectiveScoreType = resolvedScoreType != null ? resolvedScoreType : r.getScoreType();
@@ -236,6 +300,7 @@ public class AthleteService {
                 changed = true;
             }
 
+            // Only save if something actually changed
             if (changed) {
                 resultRepository.save(r);
             }
@@ -244,20 +309,30 @@ public class AthleteService {
 
     /**
      * Adjusts the number of a specific medal type for an athlete.
-     * Deletes surplus rows — prevents null-medal entries from accumulating.
-     * Creates new result rows when the target exceeds the current count.
+     * 
+     * This method handles two scenarios:
+     * 1. REDUCTION (target < current): Deletes the excess medal result rows.
+     *    This fixes the null-medal orphan problem where reducing medal counts would
+     *    leave behind rows with null medals from UPSERT logic.
+     * 2. INCREASE (target > current): Creates new result rows with the given sport and bestTime.
      *
-     * @param athlete   The athlete entity
-     * @param sport     The sports entity (may be null)
-     * @param medalType The medal type to adjust
+     * Key aspects:
+     * - Deletion happens FIRST to clean up excess rows before creating new ones
+     * - New results are created with the resolved sport (may be null)
+     * - bestTime is passed through and formatted according to scoreType
+     * - Does nothing if target == current (consistent state maintained)
+     *
+     * @param athlete   The athlete entity to adjust medals for
+     * @param sport     The sports entity to set on new results (may be null if not yet resolved)
+     * @param medalType The medal type to adjust (GOLD, SILVER, or BRONZE)
      * @param current   Current count of this medal type
      * @param target    Desired count of this medal type
-     * @param bestTime  The time/points value to set on new results
-     * @param scoreType The score type to set on new results
+     * @param bestTime  The time/points value to set on new results (applied via formatTimeOrPoints)
+     * @param scoreType The score type to set on new results (PTS, WINS, or TIME)
      */
     private void updateMedalType(Athlete athlete, Sports sport, Result.Medal medalType,
                                   int current, int target, String bestTime, Result.ScoreType scoreType) {
-        if (target == current) return;
+        if (target == current) return; // No change needed
 
         if (target < current) {
             // Delete excess medal results — fixes the null-medal orphan problem
@@ -308,10 +383,21 @@ public class AthleteService {
     }
 
     /**
-     * Convert Athlete entity to AthleteResponse DTO
+     * Converts an Athlete entity to an AthleteResponse DTO for API responses.
+     * 
+     * This method:
+     * 1. Maps basic athlete properties (id, firstName, lastName, createdAt)
+     * 2. Derives sport name and scoreType from the athlete's most recent Result
+     * 3. Aggregates medal counts (gold, silver, bronze) from all results
+     * 4. Filters results to only include those with an associated sport
+     * 5. Builds per-sport result DTOs with rank, time/points, and medal info
+     * 6. Converts country reference with all translated names
      *
-     * @param athlete The athlete entity to convert
-     * @return AthleteResponse DTO with athlete information
+     * The sport and scoreType are derived from the LAST (most recent) result
+     * to represent the athlete's current/primary sport.
+     *
+     * @param athlete The athlete entity to convert (must have id and names set)
+     * @return An AthleteResponse DTO ready for JSON serialization in API responses
      */
     private AthleteResponse toResponse(Athlete athlete) {
         AthleteResponse response = new AthleteResponse();
@@ -320,22 +406,25 @@ public class AthleteService {
         response.setLastName(athlete.getLastName());
         response.setCreatedAt(athlete.getCreatedAt());
 
+        // Fetch all results for this athlete
         List<Result> results = resultRepository.findByAthleteId(athlete.getId());
 
         // Derive sport and scoreType from the athlete's most recent result
         results.stream()
                 .filter(r -> r.getSports() != null)
-                .reduce((first, second) -> second)
+                .reduce((first, second) -> second)  // Get last element
                 .ifPresent(r -> {
                     response.setSport(r.getSports().getName());
                     response.setScoreType(r.getScoreType());
                 });
 
+        // Aggregate medal counts from all results
         int gold   = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.GOLD).count();
         int silver = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.SILVER).count();
         int bronze = (int) results.stream().filter(r -> r.getMedal() == Result.Medal.BRONZE).count();
         response.setMedals(new AthleteResponse.MedalsDto(gold, silver, bronze, gold + silver + bronze));
 
+        // Build per-sport result DTOs (only for results with associated sport)
         List<AthleteResponse.ResultDto> resultDtos = results.stream()
                 .filter(r -> r.getSports() != null)
                 .map(r -> new AthleteResponse.ResultDto(
@@ -350,6 +439,7 @@ public class AthleteService {
                 .collect(java.util.stream.Collectors.toList());
         response.setResults(resultDtos);
 
+        // Convert country reference with translations
         if (athlete.getCountry() != null) {
             Country c = athlete.getCountry();
             AthleteResponse.CountryDto countryDto = new AthleteResponse.CountryDto();
@@ -366,8 +456,17 @@ public class AthleteService {
     }
 
     /**
-     * Evicts the leaderboard cache after the current transaction is committed.
-     * This prevents a race condition where the frontend reloads data before DB changes are visible.
+     * Schedules leaderboard cache eviction after the current transaction commits.
+     * 
+     * This prevents a race condition where the frontend might:
+     * 1. Receive the API response (before commit)
+     * 2. Reload data from cache (before DB changes are visible)
+     * 3. See stale data
+     *
+     * By using TransactionSynchronizationManager, cache eviction happens AFTER the
+     * database transaction is fully committed, ensuring DB consistency.
+     *
+     * Clears caches: leaderboard, v2Athletes, v2Countries, v2Sports, v2Leaderboard
      */
     private void evictLeaderboardCacheAfterCommit() {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

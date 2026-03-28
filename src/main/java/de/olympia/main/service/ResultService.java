@@ -100,10 +100,19 @@ public class ResultService {
     }
 
     /**
-     * Maps a {@link Result} entity to a {@link ResultResponse} DTO.
+     * Converts a Result entity to a ResultResponse DTO for API responses.
+     * 
+     * This method maps all relevant result properties into a DTO:
+     * - Result ID (primary key)
+     * - Athlete information (ID, first name, last name)
+     * - Sport information (ID, name)
+     * - Medal type (GOLD, SILVER, BRONZE, or null for non-medal results)
+     * - Time/points value (the raw numeric or time value without locale-specific suffixes)
+     * - Score type (PTS, WINS, TIME)
+     * - Rank (derived from medal or explicitly set)
      *
-     * @param result The entity to map.
-     * @return The mapped DTO.
+     * @param result The Result entity to convert (must have athlete and sport loaded)
+     * @return A ResultResponse DTO ready for JSON serialization in API responses
      */
     private ResultResponse toResponse(Result result) {
         return new ResultResponse(
@@ -154,7 +163,20 @@ public class ResultService {
 
     /**
      * Maps a medal enum value to its conventional rank position.
-     * GOLD → 1, SILVER → 2, BRONZE → 3, null → null.
+     * 
+     * Rank mapping (Olympic standard):
+     * - GOLD → 1 (best/first place)
+     * - SILVER → 2 (second place)
+     * - BRONZE → 3 (third place)
+     * - null → null (no medal, rank not applicable)
+     *
+     * This mapping allows the system to derive a numeric rank from medal type,
+     * which is used for sorting and leaderboard calculations. The rank is
+     * automatically assigned on result creation based on the medal type,
+     * overriding any client-supplied rank value.
+     *
+     * @param medal The medal enum value from the Result entity (may be null)
+     * @return The corresponding rank as an Integer, or null if medal is null
      */
     private Integer medalToRank(Result.Medal medal) {
         if (medal == null) return null;
@@ -166,8 +188,23 @@ public class ResultService {
     }
 
     /**
-     * Resolves the currently authenticated {@link User} entity from the security context.
-     * Returns an empty Optional when no principal is available or the username cannot be found.
+     * Resolves the currently authenticated User entity from the Spring Security context.
+     * 
+     * This method:
+     * 1. Retrieves the Authentication object from the security context
+     * 2. Checks if authentication exists and is authenticated
+     * 3. Uses the authenticated principal's username to look up the User entity
+     * 4. Returns an Optional which may be empty if no user is found
+     *
+     * The returned User entity is used to populate the created_by field
+     * on newly created Result entities for audit trail purposes.
+     *
+     * Returns an empty Optional when:
+     * - No authentication is available in the security context
+     * - The authentication is not authenticated (e.g., anonymous)
+     * - The username cannot be found in the User repository
+     *
+     * @return An Optional containing the authenticated User entity, or empty if not found/not authenticated
      */
     private java.util.Optional<User> resolveCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

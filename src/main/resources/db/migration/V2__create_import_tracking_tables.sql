@@ -1,4 +1,7 @@
--- Create import_logs table to track file imports
+-- Create import tracking tables for the new import system
+-- These tables track import operations, including status, statistics, and detailed error/success records
+
+-- Main import log table tracking each import operation
 CREATE TABLE IF NOT EXISTS import_logs (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
@@ -6,17 +9,17 @@ CREATE TABLE IF NOT EXISTS import_logs (
     total_records INT NOT NULL DEFAULT 0,
     successful_records INT NOT NULL DEFAULT 0,
     failed_records INT NOT NULL DEFAULT 0,
-    status ENUM('PENDING','IN_PROGRESS','COMPLETED','FAILED') NOT NULL DEFAULT 'PENDING',
+    status VARCHAR(50) NOT NULL DEFAULT 'IN_PROGRESS',
+    error_message TEXT NULL,
     imported_by BIGINT NULL,
     imported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP NULL,
-    error_message TEXT NULL,
-    CONSTRAINT fk_import_logs_user FOREIGN KEY (imported_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_import_status (status),
-    INDEX idx_import_imported_at (imported_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    INDEX idx_import_imported_at (imported_at),
+    CONSTRAINT fk_import_logs_user FOREIGN KEY (imported_by) REFERENCES users(id) ON DELETE SET NULL
+);
 
--- Create import_errors table to track specific record-level errors
+-- Error tracking for failed records during import
 CREATE TABLE IF NOT EXISTS import_errors (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     import_log_id BIGINT NOT NULL,
@@ -26,21 +29,20 @@ CREATE TABLE IF NOT EXISTS import_errors (
     field_name VARCHAR(100) NULL,
     field_value VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_import_errors_log FOREIGN KEY (import_log_id) REFERENCES import_logs(id) ON DELETE CASCADE,
     INDEX idx_import_errors_log (import_log_id),
-    INDEX idx_import_errors_code (error_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    INDEX idx_import_errors_code (error_code),
+    CONSTRAINT fk_import_errors_log FOREIGN KEY (import_log_id) REFERENCES import_logs(id) ON DELETE CASCADE
+);
 
--- Create import_details table to store details about what was imported
+-- Audit trail for successfully imported/updated entities
 CREATE TABLE IF NOT EXISTS import_details (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     import_log_id BIGINT NOT NULL,
     entity_type VARCHAR(50) NOT NULL,
     entity_id BIGINT NULL,
-    action ENUM('INSERT','UPDATE','SKIP') NOT NULL,
+    action VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_import_details_log FOREIGN KEY (import_log_id) REFERENCES import_logs(id) ON DELETE CASCADE,
     INDEX idx_import_details_log (import_log_id),
-    INDEX idx_import_details_type (entity_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+    INDEX idx_import_details_type (entity_type),
+    CONSTRAINT fk_import_details_log FOREIGN KEY (import_log_id) REFERENCES import_logs(id) ON DELETE CASCADE
+);

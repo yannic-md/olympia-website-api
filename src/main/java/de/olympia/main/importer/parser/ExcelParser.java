@@ -1,8 +1,8 @@
 package de.olympia.main.importer.parser;
 
-import de.olympia.main.importer.dto.AthleteImportDto;
-import de.olympia.main.importer.dto.CountryImportDto;
-import de.olympia.main.importer.dto.ResultImportDto;
+import de.olympia.main.dto.AthleteImportDto;
+import de.olympia.main.dto.CountryImportDto;
+import de.olympia.main.dto.ResultImportDto;
 import de.olympia.main.importer.exception.InvalidImportDataException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -13,12 +13,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class ExcelParser {
@@ -28,8 +29,9 @@ public class ExcelParser {
      */
     public List<CountryImportDto> parseCountries(MultipartFile file) throws IOException {
         if (isCsvFile(file)) {
-            return parseCountriesFromCsv(file);
+            return parseCountriesCsv(file);
         }
+
         List<CountryImportDto> countries = new ArrayList<>();
 
         try (Workbook workbook = getWorkbook(file)) {
@@ -67,8 +69,9 @@ public class ExcelParser {
      */
     public List<AthleteImportDto> parseAthletes(MultipartFile file) throws IOException {
         if (isCsvFile(file)) {
-            return parseAthletesFromCsv(file);
+            return parseAthletesCsv(file);
         }
+
         List<AthleteImportDto> athletes = new ArrayList<>();
 
         try (Workbook workbook = getWorkbook(file)) {
@@ -111,8 +114,9 @@ public class ExcelParser {
      */
     public List<ResultImportDto> parseResults(MultipartFile file) throws IOException {
         if (isCsvFile(file)) {
-            return parseResultsFromCsv(file);
+            return parseResultsCsv(file);
         }
+
         List<ResultImportDto> results = new ArrayList<>();
 
         try (Workbook workbook = getWorkbook(file)) {
@@ -139,9 +143,9 @@ public class ExcelParser {
                 String athleteLastName = getCellValueAsString(row.getCell(1), rowNum, "athleteLastName");
                 String sport = getCellValueAsString(row.getCell(2), rowNum, "sport");
                 Integer rank = getCellValueAsInteger(row.getCell(3), rowNum, "rank");
-                String timeOrPoints = getCellValueAsOptionalString(row.getCell(4));
-                String scoreType = getCellValueAsOptionalString(row.getCell(5));
-                String medal = getCellValueAsOptionalString(row.getCell(6));
+                String timeOrPoints = row.getCell(4) != null ? getCellValueAsStringOptional(row.getCell(4), rowNum) : null;
+                String scoreType = row.getCell(5) != null ? getCellValueAsStringOptional(row.getCell(5), rowNum) : null;
+                String medal = row.getCell(6) != null ? getCellValueAsStringOptional(row.getCell(6), rowNum) : null;
 
                 results.add(new ResultImportDto(
                     athleteFirstName.trim(),
@@ -151,6 +155,102 @@ public class ExcelParser {
                     timeOrPoints != null ? timeOrPoints.trim() : null,
                     scoreType != null ? scoreType.trim() : null,
                     medal != null ? medal.trim() : null
+                ));
+            }
+        }
+
+        return results;
+    }
+
+    private List<CountryImportDto> parseCountriesCsv(MultipartFile file) throws IOException {
+        List<CountryImportDto> countries = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser parser = CSVFormat.DEFAULT
+                 .builder()
+                 .setHeader()
+                 .setSkipHeaderRecord(true)
+                 .setTrim(true)
+                 .build()
+                 .parse(reader)) {
+
+            for (CSVRecord record : parser) {
+                int rowNum = (int) record.getRecordNumber() + 1;
+                if (isCsvRecordEmpty(record)) {
+                    continue;
+                }
+
+                String code = getCsvValueByName(record, "code", rowNum, true);
+                String name = getCsvValueByName(record, "name", rowNum, true);
+                countries.add(new CountryImportDto(code, name));
+            }
+        }
+
+        return countries;
+    }
+
+    private List<AthleteImportDto> parseAthletesCsv(MultipartFile file) throws IOException {
+        List<AthleteImportDto> athletes = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser parser = CSVFormat.DEFAULT
+                 .builder()
+                 .setHeader()
+                 .setSkipHeaderRecord(true)
+                 .setTrim(true)
+                 .build()
+                 .parse(reader)) {
+
+            for (CSVRecord record : parser) {
+                int rowNum = (int) record.getRecordNumber() + 1;
+                if (isCsvRecordEmpty(record)) {
+                    continue;
+                }
+
+                String firstName = getCsvValueByName(record, "firstName", rowNum, true);
+                String lastName = getCsvValueByName(record, "lastName", rowNum, true);
+                String countryCode = getCsvValueByName(record, "countryCode", rowNum, false);
+                athletes.add(new AthleteImportDto(firstName, lastName, countryCode));
+            }
+        }
+
+        return athletes;
+    }
+
+    private List<ResultImportDto> parseResultsCsv(MultipartFile file) throws IOException {
+        List<ResultImportDto> results = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser parser = CSVFormat.DEFAULT
+                 .builder()
+                 .setHeader()
+                 .setSkipHeaderRecord(true)
+                 .setTrim(true)
+                 .build()
+                 .parse(reader)) {
+
+            for (CSVRecord record : parser) {
+                int rowNum = (int) record.getRecordNumber() + 1;
+                if (isCsvRecordEmpty(record)) {
+                    continue;
+                }
+
+                String athleteFirstName = getCsvValueByName(record, "athleteFirstName", rowNum, true);
+                String athleteLastName = getCsvValueByName(record, "athleteLastName", rowNum, true);
+                String sport = getCsvValueByName(record, "sport", rowNum, true);
+                Integer rank = getCsvIntegerValueByName(record, "rank", rowNum, true);
+                String timeOrPoints = getCsvValueByName(record, "timeOrPoints", rowNum, false);
+                String scoreType = getCsvValueByName(record, "scoreType", rowNum, false);
+                String medal = getCsvValueByName(record, "medal", rowNum, false);
+
+                results.add(new ResultImportDto(
+                    athleteFirstName,
+                    athleteLastName,
+                    sport,
+                    rank,
+                    timeOrPoints,
+                    scoreType,
+                    medal
                 ));
             }
         }
@@ -173,8 +273,109 @@ public class ExcelParser {
             return new HSSFWorkbook(file.getInputStream());
         } else {
             throw new InvalidImportDataException(
-                "Only .xlsx and .xls files are supported. Got: " + filename,
+                "Only .xlsx, .xls and .csv files are supported. Got: " + filename,
                 "UNSUPPORTED_FORMAT"
+            );
+        }
+    }
+
+    private boolean isCsvFile(MultipartFile file) {
+        String filename = file.getOriginalFilename();
+        return filename != null && filename.toLowerCase(Locale.ROOT).endsWith(".csv");
+    }
+
+    private boolean isCsvRecordEmpty(CSVRecord record) {
+        for (int i = 0; i < record.size(); i++) {
+            String value = record.get(i);
+            if (value != null && !value.trim().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String getCsvValueByName(CSVRecord record, String columnName, int rowNum, boolean required) {
+        String value = null;
+        try {
+            value = record.get(columnName);
+        } catch (IllegalArgumentException e) {
+            if (required) {
+                throw new InvalidImportDataException(
+                    "Required column '" + columnName + "' not found in CSV header",
+                    "MISSING_REQUIRED_FIELD",
+                    rowNum,
+                    columnName
+                );
+            }
+            return null;
+        }
+
+        if (value != null) {
+            value = value.trim();
+        }
+
+        if (required && (value == null || value.isEmpty())) {
+            throw new InvalidImportDataException(
+                "Required field is empty",
+                "MISSING_REQUIRED_FIELD",
+                rowNum,
+                columnName
+            );
+        }
+
+        return (value == null || value.isEmpty()) ? null : value;
+    }
+
+    private Integer getCsvIntegerValueByName(CSVRecord record, String columnName, int rowNum, boolean required) {
+        String value = getCsvValueByName(record, columnName, rowNum, required);
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidImportDataException(
+                "Invalid integer value: " + value,
+                "INVALID_NUMBER_FORMAT",
+                rowNum,
+                columnName
+            );
+        }
+    }
+
+    private String getCsvValue(CSVRecord record, int index, int rowNum, String fieldName, boolean required) {
+        String value = index < record.size() ? record.get(index) : null;
+        if (value != null) {
+            value = value.trim();
+        }
+
+        if (required && (value == null || value.isEmpty())) {
+            throw new InvalidImportDataException(
+                "Required field is empty",
+                "MISSING_REQUIRED_FIELD",
+                rowNum,
+                fieldName
+            );
+        }
+
+        return (value == null || value.isEmpty()) ? null : value;
+    }
+
+    private Integer getCsvIntegerValue(CSVRecord record, int index, int rowNum, String fieldName, boolean required) {
+        String value = getCsvValue(record, index, rowNum, fieldName, required);
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidImportDataException(
+                "Invalid integer value: " + value,
+                "INVALID_NUMBER_FORMAT",
+                rowNum,
+                fieldName
             );
         }
     }
@@ -197,7 +398,7 @@ public class ExcelParser {
     }
 
     /**
-     * Get cell value as string (required field)
+     * Get cell value as string
      */
     private String getCellValueAsString(Cell cell, int rowNum, String fieldName) {
         if (cell == null) {
@@ -224,14 +425,10 @@ public class ExcelParser {
     }
 
     /**
-     * Get cell value as optional string (nullable field)
+     * Get cell value as string (optional - returns null if cell is blank or null)
      */
-    private String getCellValueAsOptionalString(Cell cell) {
-        if (cell == null) {
-            return null;
-        }
-
-        if (cell.getCellType() == CellType.BLANK) {
+    private String getCellValueAsStringOptional(Cell cell, int rowNum) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
             return null;
         }
 
@@ -239,18 +436,10 @@ public class ExcelParser {
             String value = cell.getStringCellValue();
             return value != null && !value.isEmpty() ? value : null;
         } else if (cell.getCellType() == CellType.NUMERIC) {
-            // Handle numeric cells (e.g., times stored as numbers)
-            return String.valueOf(cell.getNumericCellValue());
+            return String.valueOf((long) cell.getNumericCellValue());
         }
 
-        // For other types, try to get string representation
-        try {
-            String value = cell.toString();
-            return value != null && !value.isEmpty() ? value : null;
-        } catch (Exception e) {
-            // If conversion fails, return null instead of throwing exception for optional fields
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -287,132 +476,6 @@ public class ExcelParser {
             rowNum,
             fieldName
         );
-    }
-
-    // ---------------------------------------------------------------
-    // CSV parsing helpers
-    // ---------------------------------------------------------------
-
-    private boolean isCsvFile(MultipartFile file) {
-        String filename = file.getOriginalFilename();
-        return filename != null && filename.toLowerCase().endsWith(".csv");
-    }
-
-    private CSVFormat buildCsvFormat() {
-        return CSVFormat.DEFAULT.builder()
-                .setHeader()
-                .setSkipHeaderRecord(true)
-                .setIgnoreHeaderCase(true)
-                .setTrim(true)
-                .setIgnoreEmptyLines(true)
-                .build();
-    }
-
-    /**
-     * Parse countries from CSV file.
-     * Expected columns (case-insensitive): code, name
-     */
-    private List<CountryImportDto> parseCountriesFromCsv(MultipartFile file) throws IOException {
-        List<CountryImportDto> countries = new ArrayList<>();
-        try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
-             CSVParser csvParser = new CSVParser(reader, buildCsvFormat())) {
-
-            int rowNum = 2; // row 1 = header
-            for (CSVRecord record : csvParser) {
-                String code = getRequiredCsvValue(record, "code", rowNum);
-                String name = getRequiredCsvValue(record, "name", rowNum);
-                countries.add(new CountryImportDto(code, name));
-                rowNum++;
-            }
-        }
-        return countries;
-    }
-
-    /**
-     * Parse athletes from CSV file.
-     * Expected columns (case-insensitive): firstName, lastName, countryCode
-     */
-    private List<AthleteImportDto> parseAthletesFromCsv(MultipartFile file) throws IOException {
-        List<AthleteImportDto> athletes = new ArrayList<>();
-        try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
-             CSVParser csvParser = new CSVParser(reader, buildCsvFormat())) {
-
-            int rowNum = 2;
-            for (CSVRecord record : csvParser) {
-                String firstName = getRequiredCsvValue(record, "firstName", rowNum);
-                String lastName = getRequiredCsvValue(record, "lastName", rowNum);
-                String countryCode = getOptionalCsvValue(record, "countryCode");
-                athletes.add(new AthleteImportDto(firstName, lastName, countryCode));
-                rowNum++;
-            }
-        }
-        return athletes;
-    }
-
-    /**
-     * Parse results from CSV file.
-     * Expected columns (case-insensitive):
-     *   athleteFirstName, athleteLastName, sport, rank, timeOrPoints, scoreType, medal
-     */
-    private List<ResultImportDto> parseResultsFromCsv(MultipartFile file) throws IOException {
-        List<ResultImportDto> results = new ArrayList<>();
-        try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
-             CSVParser csvParser = new CSVParser(reader, buildCsvFormat())) {
-
-            int rowNum = 2;
-            for (CSVRecord record : csvParser) {
-                String athleteFirstName = getRequiredCsvValue(record, "athleteFirstName", rowNum);
-                String athleteLastName  = getRequiredCsvValue(record, "athleteLastName", rowNum);
-                String sport = getRequiredCsvValue(record, "sport", rowNum);
-                String rankStr = getRequiredCsvValue(record, "rank", rowNum);
-                Integer rank;
-                try {
-                    rank = Integer.parseInt(rankStr);
-                } catch (NumberFormatException e) {
-                    throw new InvalidImportDataException(
-                        "Invalid integer value for rank: " + rankStr,
-                        "INVALID_NUMBER_FORMAT",
-                        rowNum,
-                        "rank"
-                    );
-                }
-                String timeOrPoints = getOptionalCsvValue(record, "timeOrPoints");
-                String scoreType    = getOptionalCsvValue(record, "scoreType");
-                String medal        = getOptionalCsvValue(record, "medal");
-                results.add(new ResultImportDto(athleteFirstName, athleteLastName, sport, rank, timeOrPoints, scoreType, medal));
-                rowNum++;
-            }
-        }
-        return results;
-    }
-
-    private String getRequiredCsvValue(CSVRecord record, String columnName, int rowNum) {
-        if (!record.isMapped(columnName)) {
-            throw new InvalidImportDataException(
-                "Required column not found: " + columnName,
-                "MISSING_COLUMN",
-                rowNum,
-                columnName
-            );
-        }
-        String value = record.get(columnName).trim();
-        if (value.isEmpty()) {
-            throw new InvalidImportDataException(
-                "Required field is empty: " + columnName,
-                "MISSING_REQUIRED_FIELD",
-                rowNum,
-                columnName
-            );
-        }
-        return value;
-    }
-
-    private String getOptionalCsvValue(CSVRecord record, String columnName) {
-        if (!record.isMapped(columnName)) {
-            return null;
-        }
-        String value = record.get(columnName).trim();
-        return value.isEmpty() ? null : value;
     }
 }
 
