@@ -1,23 +1,23 @@
-# ✅ KORREKTE IMPORT-ANLEITUNG
+# ✅ CORRECT IMPORT GUIDE
 
 ## 🎯 Problem
-Die Results werden nicht importiert, weil die Athletes nicht existieren.
+Results are not being imported because athletes don't exist.
 
-## ✅ Lösung: Korrekte Import-Reihenfolge
+## ✅ Solution: Correct Import Order
 
-### **WICHTIG: Importreihenfolge einhalten!**
+### **IMPORTANT: Follow the import order!**
 
 ```
-Step 1️⃣  COUNTRIES importieren (ZUERST!)
-Step 2️⃣  ATHLETES importieren (ZWEITE)
-Step 3️⃣  RESULTS importieren (ZULETZT)
+Step 1️⃣  Import COUNTRIES (FIRST!)
+Step 2️⃣  Import ATHLETES (SECOND)
+Step 3️⃣  Import RESULTS (LAST)
 ```
 
 ---
 
-## 📋 Schritt-für-Schritt Anleitung
+## 📋 Step-by-Step Instructions
 
-### **Schritt 1: Countries importieren**
+### **Step 1: Import Countries**
 
 ```bash
 curl -X POST http://localhost:8080/api/imports/countries \
@@ -25,7 +25,7 @@ curl -X POST http://localhost:8080/api/imports/countries \
   -F "file=@countries_test.csv"
 ```
 
-**Erwartung:**
+**Expectation:**
 ```json
 {
   "status": "COMPLETED",
@@ -34,11 +34,11 @@ curl -X POST http://localhost:8080/api/imports/countries \
 }
 ```
 
-✅ **10 Countries sollten importiert sein**
+✅ **10 Countries should be imported**
 
 ---
 
-### **Schritt 2: Athletes importieren**
+### **Step 2: Import Athletes**
 
 ```bash
 curl -X POST http://localhost:8080/api/imports/athletes \
@@ -46,7 +46,7 @@ curl -X POST http://localhost:8080/api/imports/athletes \
   -F "file=@athletes_test.csv"
 ```
 
-**Erwartung:**
+**Expectation:**
 ```json
 {
   "status": "COMPLETED",
@@ -55,7 +55,7 @@ curl -X POST http://localhost:8080/api/imports/athletes \
 }
 ```
 
-✅ **10 Athletes sollten jetzt in der DB sein:**
+✅ **10 Athletes should now be in the database:**
 - Mikaela Shiffrin (US)
 - Marco Odermatt (CH)
 - Petra Vlhova (SK)
@@ -69,7 +69,7 @@ curl -X POST http://localhost:8080/api/imports/athletes \
 
 ---
 
-### **Schritt 3: Results importieren**
+### **Step 3: Import Results**
 
 ```bash
 curl -X POST http://localhost:8080/api/imports/results \
@@ -77,7 +77,7 @@ curl -X POST http://localhost:8080/api/imports/results \
   -F "file=@results_test.csv"
 ```
 
-**Erwartung:**
+**Expectation:**
 ```json
 {
   "status": "COMPLETED",
@@ -86,58 +86,58 @@ curl -X POST http://localhost:8080/api/imports/results \
 }
 ```
 
-✅ **8 Results sollten jetzt importiert sein**
+✅ **8 Results should now be imported**
 
 ---
 
-## 📊 Überprüfung in der Datenbank
+## 📊 Database Verification
 
-### SQL-Befehle zum Überprüfen:
+### SQL Commands to Check:
 
 ```sql
--- Countries überprüfen
+-- Verify countries
 SELECT COUNT(*) as country_count FROM countries WHERE code IN ('us', 'de', 'fr', 'gb', 'jp', 'cn', 'au', 'ca', 'it', 'es');
 
--- Athletes überprüfen
+-- Verify athletes
 SELECT COUNT(*) as athlete_count FROM athletes 
 WHERE (first_name = 'Sofia' AND last_name = 'Goggia')
    OR (first_name = 'Mikaela' AND last_name = 'Shiffrin')
    OR (first_name = 'Nathan' AND last_name = 'Chen');
 
--- Results überprüfen
+-- Verify results
 SELECT COUNT(*) as result_count FROM results 
 WHERE athlete_id IN (SELECT id FROM athletes WHERE first_name IN ('Sofia', 'Mikaela', 'Nathan', 'Yuzuru', 'Ireen'));
 ```
 
 ---
 
-## 🔴 Falls immer noch Fehler:
+## 🔴 If You Still Have Errors:
 
-### **Fehlerquelle 1: Results zeigt 0 Erfolgreiche Records**
+### **Error Source 1: Results shows 0 successful records**
 
-**Überprüfung:**
+**Check:**
 ```bash
-# Import-Fehler prüfen
+# Check import errors
 curl -X GET http://localhost:8080/api/imports/logs \
   -u admin:admin | jq '.[] | select(.importType=="RESULTS")'
 ```
 
-**Mögliche Fehler:**
-- `ATHLETE_NOT_FOUND` → Athletes wurden nicht importiert
-- `SPORT_NOT_FOUND` → Sport existiert nicht (case-sensitive!)
-- `INVALID_NUMBER_FORMAT` → rank oder timeOrPoints falsch formatiert
+**Possible Errors:**
+- `ATHLETE_NOT_FOUND` → Athletes were not imported
+- `SPORT_NOT_FOUND` → Sport doesn't exist (case-sensitive!)
+- `INVALID_NUMBER_FORMAT` → rank or timeOrPoints formatted incorrectly
 
-### **Fehlerquelle 2: Cache zeigt alte Daten**
+### **Error Source 2: Cache shows old data**
 
-**Lösung - Cache leeren:**
+**Solution - Clear cache:**
 ```bash
-# Admin-Dashboard: Cache manuell zurücksetzen
-# Oder: Server neu starten
+# Admin Dashboard: Reset cache manually
+# Or: Restart server
 ```
 
 ---
 
-## 📋 Test-Dateien Inhalt
+## 📋 Test File Contents
 
 ### **countries_test.csv**
 - us, de, fr, gb, jp, cn, au, ca, it, es
@@ -164,18 +164,18 @@ curl -X GET http://localhost:8080/api/imports/logs \
 - Yuzuru Hanyu - Figure Skating - Rank 2 - SILVER
 - Ireen Wust - Speed Skating - Rank 1 - GOLD
 
-**Alle Athletes und Sports existieren in der Datenbank-Seeding!**
+**All Athletes and Sports exist in the database seeding!**
 
 ---
 
-## ✅ Checkliste
+## ✅ Checklist
 
-- [ ] Countries erfolgreich importiert (10 Records)
-- [ ] Athletes erfolgreich importiert (10 Records)
-- [ ] Results erfolgreich importiert (8 Records)
-- [ ] Keine Fehler in Import-Logs
-- [ ] Daten sichtbar im Frontend
-- [ ] Cache geleert wenn nötig
+- [ ] Countries successfully imported (10 records)
+- [ ] Athletes successfully imported (10 records)
+- [ ] Results successfully imported (8 records)
+- [ ] No errors in import logs
+- [ ] Data visible in frontend
+- [ ] Cache cleared if necessary
 
 **Status: Ready to test!** 🎉
 

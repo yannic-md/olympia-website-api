@@ -1,17 +1,17 @@
-# API Endpoints Übersicht
+# API Endpoints Overview
 
-Diese Datei bietet eine schnelle Übersicht über alle verfügbaren API-Endpunkte.
+This file provides a quick overview of all available API endpoints.
 
-## Public Endpoints (Keine Authentifizierung erforderlich)
+## Public Endpoints (No Authentication Required)
 
 ### Leaderboard
-- `GET /api/public/leaderboard?lang={en|de|fr}` - Alle Turnier-Ergebnisse mit Sport-Namen
-- `GET /api/public/leaderboard/medals?lang={en|de|fr}` - Nur Medaillengewinner
+- `GET /api/public/leaderboard?lang={en|de|fr}` - All tournament results with sport names
+- `GET /api/public/leaderboard/medals?lang={en|de|fr}` - Medal winners only
 
-**Übersetzungen:** Query-Parameter `lang` unterstützt `en` (Standard), `de`, `fr`.
-Übersetzt werden: `sportName`, `countryName`, `medal`, `scoreType`.
+**Translations:** Query parameter `lang` supports `en` (default), `de`, `fr`.
+Translated fields: `sportName`, `countryName`, `medal`, `scoreType`.
 
-**Dokumentation:** [FeaturePublicLeaderboard.md](FeaturePublicLeaderboard.md)
+**Documentation:** [FeaturePublicLeaderboard.md](FeaturePublicLeaderboard.md)
 
 ---
 
@@ -62,7 +62,7 @@ Diese Datei bietet eine schnelle Übersicht über alle verfügbaren API-Endpunkt
 
 ## Quick Start Examples
 
-### 1. Login als Admin
+### 1. Login as Admin
 ```bash
 curl -X POST "http://localhost:8080/api/auth/login" \
   -H "Content-Type: application/json" \
@@ -230,7 +230,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ]
 ```
 
-### Fehler-Antworten
+### Error Responses
 
 #### 401 Unauthorized
 ```json
@@ -261,78 +261,78 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ## Performance Features
 
 ### Caching
-- **Spring Cache** auf Backend
-- **HTTP Cache-Control** für Frontend
-- Leaderboard-Endpunkte gecacht für 5 Minuten
+- **Spring Cache** on backend
+- **HTTP Cache-Control** for frontend
+- Leaderboard endpoints cached for 5 minutes
 
 ### CORS
-- Public Endpunkte erlauben alle Origins
-- Für Production: Origins einschränken
+- Public endpoints allow all origins
+- For production: restrict origins
 
 ---
 
 ## Database Reset
 
-Der Admin kann die Datenbank zurücksetzen:
+The admin can reset the database:
 
 ```bash
-# 1. Als Admin einloggen
+# 1. Login as admin
 TOKEN=$(curl -X POST "http://localhost:8080/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin123"}' \
   | jq -r '.token')
 
-# 2. Database Reset
+# 2. Database reset
 curl -X POST "http://localhost:8080/api/admin/reset" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-**Hinweis:** Nur der Admin-User bleibt erhalten, alle anderen Daten werden gelöscht!
+**Note:** Only the admin user remains; all other data will be deleted!
 
 ---
 
 ## Translation
 
-Die Leaderboard-Endpunkte unterstützen **Englisch**, **Deutsch** und **Französisch**.
+The leaderboard endpoints support **English**, **German** and **French**.
 
-### Verwendung
+### Usage
 ```bash
-# Standard (Englisch)
+# Default (English)
 curl http://localhost:8080/api/public/leaderboard
 
-# Deutsch
+# German
 curl http://localhost:8080/api/public/leaderboard?lang=de
 
-# Französisch
+# French
 curl http://localhost:8080/api/public/leaderboard?lang=fr
 ```
 
-### Übersetzte Felder
+### Translated Fields
 
-| Feld          | EN (Default)    | DE                  | FR                              |
+| Field         | EN (Default)    | DE                  | FR                              |
 |---------------|-----------------|---------------------|---------------------------------|
 | `sportName`   | Alpine Skiing   | Ski Alpin           | Ski alpin                       |
 | `countryName` | Germany         | Deutschland         | Allemagne                       |
 | `medal`       | Gold / Silver / Bronze | Gold / Silber / Bronze | Or / Argent / Bronze     |
 | `scoreType`   | Time / Points / Wins | Zeit / Punkte / Siege | Temps / Points / Victoires |
 
-### Nicht übersetzte Felder
-- `athleteName` – Name bleibt unverändert
-- `countryCode` – ISO-Code bleibt unverändert
-- `timeOrPoints` – Rohwert bleibt unverändert
-- `rank`, `resultId` – numerische Werte
+### Non-translated Fields
+- `athleteName` – Name remains unchanged
+- `countryCode` – ISO code remains unchanged
+- `timeOrPoints` – Raw value remains unchanged
+- `rank`, `resultId` – numeric values
 
-### Technische Details
-- **Service:** `TranslationService` mit statischen Übersetzungs-Maps
-- **Fallback:** Unbekannte Werte werden unverändert zurückgegeben
-- **Caching:** Cache-Keys sind sprachabhängig (`all_en`, `all_de`, `medals_fr`, etc.)
-- **Default:** `en` wenn kein `lang` Parameter angegeben oder ungültiger Wert
+### Technical Details
+- **Service:** `TranslationService` with static translation maps
+- **Fallback:** Unknown values are returned unchanged
+- **Caching:** Cache keys are language-dependent (`all_en`, `all_de`, `medals_fr`, etc.)
+- **Default:** `en` if no `lang` parameter specified or invalid value
 
 ---
 
-## Weitere Dokumentation
+## Further Documentation
 
-Detaillierte Informationen zu jedem Feature findest du in den entsprechenden Dokumentationsdateien:
+Detailed information for each feature can be found in the corresponding documentation files:
 
 - [FeatureLogin.md](FeatureLogin.md) - Authentication & JWT
 - [FeatureAthleteManagement.md](FeatureAthleteManagement.md) - Athlete CRUD

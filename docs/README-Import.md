@@ -1,6 +1,342 @@
-# 📑 Import-Dokumentation - Übersichtsseite
+# 📑 Import Documentation - Overview Page
 
-Willkommen in der Import-Dokumentation für das Olympia-Website-API System! Diese Seite bietet einen schnellen Überblick über alle verfügbaren Dokumentationen.
+Welcome to the Import documentation for the Olympia Website API system! This page provides a quick overview of all available documentation.
+
+---
+
+## 📚 Available Documentation
+
+### 1. 📋 **[ImportDateiFormat.md](./ImportDateiFormat.md)** - The Main Document
+
+**For whom?** Users who want to understand the exact requirements for import files.
+
+**Contents:**
+- ✅ Detailed column structure for countries, athletes and results
+- ✅ Formatting rules and requirements
+- ✅ Common errors and their solutions
+- ✅ Step-by-step instructions
+- ✅ Troubleshooting guide
+- ✅ FAQs
+
+**Use this document for:**
+- 🎯 Creating new import files
+- 🎯 Understanding data formats
+- 🎯 Error fixing
+
+---
+
+### 2. ✅ **[ImportCheckliste.md](./ImportCheckliste.md)** - Quick Reference
+
+**For whom?** Users who want to quickly check if their file is correct.
+
+**Contents:**
+- ✅ Checklists for each data type (countries, athletes, results)
+- ✅ Quick format overviews
+- ✅ Error troubleshooting short guide
+- ✅ Import order
+- ✅ Quick tips
+
+**Use this document for:**
+- 🎯 Quick verification before import
+- 🎯 Quick debugging of failed imports
+- 🎯 Remember the correct order
+
+---
+
+### 3. 📚 **[ImportBeispiele.md](./ImportBeispiele.md)** - Practical Examples
+
+**For whom?** Users who want to see practical examples and best practices.
+
+**Contents:**
+- ✅ Complete example files for all data types
+- ✅ Common errors with solutions
+- ✅ Best practices
+- ✅ Complete workflow examples
+- ✅ Do's and Don'ts
+
+**Use this document for:**
+- 🎯 See concrete examples
+- 🎯 Understand best practices
+- 🎯 Learn from others' mistakes
+
+---
+
+### 4. 📖 **[FeatureExcelImport.md](./FeatureExcelImport.md)** - Technical Details
+
+**For whom?** Developers and technical users who want to understand API details.
+
+**Contents:**
+- ✅ API endpoints
+- ✅ Authentication
+- ✅ Request/Response formats
+- ✅ Status messages
+
+**Use this document for:**
+- 🎯 API integration
+- 🎯 Programmatic imports
+- 🎯 Technical details
+
+---
+
+## 🚀 Quick Start (3 Steps)
+
+### Step 1️⃣ : Understand Import Order
+
+```
+1. Import Countries
+2. Import Athletes
+3. Import Results
+```
+
+**Why?** Athletes need countries, results need athletes.
+
+---
+
+### Step 2️⃣ : Prepare File
+
+Use the following formats:
+
+**Countries:**
+```csv
+code,name
+us,United States
+de,Germany
+```
+
+**Athletes:**
+```csv
+firstName,lastName,countryCode,gender
+Mikaela,Shiffrin,us,F
+Marco,Odermatt,ch,M
+```
+
+**Results:**
+```csv
+athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
+Sofia,Goggia,Alpine Skiing,1,1:32.03,TIME,GOLD
+```
+
+---
+
+### Step 3️⃣ : Import and Verify
+
+1. Open admin dashboard
+2. Upload file
+3. Start import
+4. Check status
+5. ✅ Done!
+
+---
+
+## 🎯 By Use Case
+
+### 👤 "I'm a beginner and want to start quickly"
+
+1. Read: [ImportCheckliste.md](./ImportCheckliste.md) (5 minutes)
+2. Copy: Examples from [ImportBeispiele.md](./ImportBeispiele.md)
+3. Test: With 3-5 rows
+4. Import: The complete file
+
+---
+
+### 📋 "I need to import a large file"
+
+1. Read: [ImportDateiFormat.md](./ImportDateiFormat.md) (15 minutes)
+2. Prepare: Go through [ImportCheckliste.md](./ImportCheckliste.md)
+3. Validate: Check file
+4. Test import: With small subset
+5. Production: Complete import
+
+---
+
+### 🔍 "My import fails, I need help"
+
+1. See: [ImportDateiFormat.md - Common Errors](./ImportDateiFormat.md#common-errors)
+2. Check: [ImportCheckliste.md - Error Troubleshooting](./ImportCheckliste.md#-error-troubleshooting)
+3. Compare: With [ImportBeispiele.md](./ImportBeispiele.md#-common-errors--their-solutions)
+
+---
+
+### 👨‍💻 "I'm developing and need API details"
+
+1. Read: [FeatureExcelImport.md](./FeatureExcelImport.md)
+2. See also: [ImportDateiFormat.md - Rules](./ImportDateiFormat.md)
+
+---
+
+## 📊 Data Type Overview
+
+### 🌍 Countries
+
+| Property | Value |
+|----------|-------|
+| **Columns** | `code`, `name` |
+| **code Format** | 2-3 characters, lowercase (e.g. "us", "de") |
+| **Dependencies** | None (import first!) |
+| **Example** | `us,United States` |
+
+**Documentation:** [ImportDateiFormat.md → Countries](./ImportDateiFormat.md#1️⃣-countries-import)
+
+---
+
+### 🏃 Athletes
+
+| Property | Value |
+|----------|-------|
+| **Columns** | `firstName`, `lastName`, `countryCode`, `gender` (optional) |
+| **countryCode** | Must exist in Countries |
+| **gender** | `M` or `F` (optional) |
+| **Dependencies** | **Countries must exist!** |
+| **Example** | `Mikaela,Shiffrin,us,F` |
+
+**Documentation:** [ImportDateiFormat.md → Athletes](./ImportDateiFormat.md#2️⃣-athletes-import)
+
+---
+
+### 🏅 Results
+
+| Property | Value |
+|----------|-------|
+| **Columns** | `athleteFirstName`, `athleteLastName`, `sport`, `rank`, `timeOrPoints`, `scoreType` (optional), `medal` (optional) |
+| **rank** | Positive integer (≥ 1) |
+| **scoreType** | `PTS`, `WINS`, `TIME` or empty |
+| **medal** | `GOLD`, `SILVER`, `BRONZE` or empty |
+| **Dependencies** | **Athletes must exist!** |
+| **Example** | `Sofia,Goggia,Alpine Skiing,1,1:32.03,TIME,GOLD` |
+
+**Documentation:** [ImportDateiFormat.md → Results](./ImportDateiFormat.md#3️⃣-results-import)
+
+---
+
+## 🔗 Most Important Links
+
+| Link | Description | For |
+|------|-------------|-----|
+| [ImportDateiFormat.md](./ImportDateiFormat.md) | Complete format documentation | Everyone |
+| [ImportCheckliste.md](./ImportCheckliste.md) | Quick checklist & quick reference | Quick users |
+| [ImportBeispiele.md](./ImportBeispiele.md) | Practical examples & best practices | Learners |
+| [FeatureExcelImport.md](./FeatureExcelImport.md) | API details & technical | Developers |
+| [/test-excel-files/](../test-excel-files/) | Test files to try out | Everyone |
+
+---
+
+## ⚠️ Important Rules (Don't Forget!)
+
+### 🎯 Rule 1: Import Order
+
+```
+Countries → Athletes → Results
+(NOT: Athletes → Countries!)
+```
+
+### 🎯 Rule 2: Names must match exactly
+
+```
+Athlete in Athletes: "Sofia Goggia"
+Athlete in Results:  "Sofia Goggia"  ✅ CORRECT
+                     "sofia goggia"  ❌ WRONG
+```
+
+### 🎯 Rule 3: Country code in lowercase
+
+```
+✅ "us", "de", "fr" (lowercase)
+❌ "US", "DE", "FR" (uppercase)
+```
+
+### 🎯 Rule 4: Medal and ScoreType in uppercase
+
+```
+✅ "GOLD", "SILVER", "BRONZE" (uppercase)
+❌ "gold", "silver", "bronze" (lowercase)
+
+✅ "PTS", "TIME", "WINS" (uppercase)
+❌ "pts", "time", "wins" (lowercase)
+```
+
+---
+
+## 🆘 Frequently Asked Questions
+
+### Q: Can I change the import order?
+**A:** No. Countries must be imported before Athletes, Athletes must be imported before Results.
+
+### Q: What happens with duplicates?
+**A:** For Countries an error is thrown. For Athletes and Results new entries are created.
+
+### Q: Can I use a wrong column order?
+**A:** No. Columns must be in the specified order, but column names must be correct.
+
+### Q: Are umlauts supported?
+**A:** Yes, umlauts and special characters are fully supported.
+
+### Q: What is the maximum file size?
+**A:** The system can import large files. If in doubt: test with 100+ rows.
+
+---
+
+## 📞 Support
+
+If you have questions:
+
+1. **Ask the documentation:**
+   - [ImportDateiFormat.md - FAQs](./ImportDateiFormat.md#frequently-asked-questions)
+   - [ImportBeispiele.md - Common Errors](./ImportBeispiele.md#-common-errors--their-solutions)
+
+2. **Check the logs:**
+   - Admin Dashboard → Import Logs
+   - Look at the failed rows
+
+3. **Compare with examples:**
+   - [ImportBeispiele.md](./ImportBeispiele.md) - Practical examples
+   - [/test-excel-files/](../test-excel-files/) - Test files
+
+---
+
+## 🎓 Learning Paths
+
+### 🟢 Beginner Learning Path (30 minutes)
+
+1. Read: This page (overview)
+2. Read: [ImportCheckliste.md](./ImportCheckliste.md)
+3. See: Examples in [ImportBeispiele.md](./ImportBeispiele.md)
+4. Practice: Test with test files
+
+### 🟡 Intermediate Learning Path (1-2 hours)
+
+1. Read: [ImportDateiFormat.md](./ImportDateiFormat.md) - all
+2. Read: [ImportBeispiele.md](./ImportBeispiele.md) - all
+3. Study: All error examples
+4. Practice: Create your own file
+
+### 🔴 Advanced Learning Path (2+ hours)
+
+1. Read: [FeatureExcelImport.md](./FeatureExcelImport.md)
+2. Read: [ImportDateiFormat.md](./ImportDateiFormat.md) - all details
+3. Study: Source code and API integration
+4. Implement: Programmatic imports
+
+---
+
+## 🔍 Search by Error Type
+
+- **`DUPLICATE_COUNTRY`** → [ImportDateiFormat.md - Country Errors](./ImportDateiFormat.md#common-errors) or [ImportBeispiele.md - Error 1](./ImportBeispiele.md#error-1-duplicate_country)
+
+- **`ATHLETE_COUNTRY_NOT_FOUND`** → [ImportDateiFormat.md - Athlete Errors](./ImportDateiFormat.md#common-errors-1) or [ImportBeispiele.md - Error 2](./ImportBeispiele.md#error-2-athlete_country_not_found)
+
+- **`ATHLETE_NOT_FOUND`** → [ImportDateiFormat.md - Result Errors](./ImportDateiFormat.md#common-errors-2) or [ImportBeispiele.md - Error 3](./ImportBeispiele.md#error-3-athlete_not_found)
+
+- **`INVALID_RANK`** → [ImportBeispiele.md - Error 4](./ImportBeispiele.md#error-4-invalid_rank)
+
+- **`INVALID_MEDAL`** or **`INVALID_SCORE_TYPE`** → [ImportBeispiele.md - Error 5](./ImportBeispiele.md#error-5-invalid_medal-or-invalid_score_type)
+
+- **`INVALID_NUMBER_FORMAT`** → [ImportBeispiele.md - Error 6](./ImportBeispiele.md#error-6-invalid_number_format)
+
+---
+
+**Last Updated:** 28.03.2026  
+**Version:** 1.0  
+**Documentation Complete:** ✅
 
 ---
 

@@ -1,46 +1,46 @@
-# 📋 Import-Dateien Format Guide
+# 📋 Import File Format Guide
 
-## 📖 Übersicht
+## 📖 Overview
 
-Dieses Dokument beschreibt die genaue Struktur und Anforderungen für Dateien, die in das Olympia-Website-System importiert werden sollen. Es werden drei Datentypen unterstützt:
+This document describes the exact structure and requirements for files to be imported into the Olympia Website system. Three data types are supported:
 
-1. **Länder (Countries)**
-2. **Athleten (Athletes)**
-3. **Ergebnisse (Results)**
-
----
-
-## ⚠️ Wichtig: Importreihenfolge
-
-Die Import-Reihenfolge ist **KRITISCH**. Bitte beachten Sie die folgende Reihenfolge:
-
-```
-1️⃣  LÄNDER (Countries) ← ZUERST
-2️⃣  ATHLETEN (Athletes) ← ZWEITE
-3️⃣  ERGEBNISSE (Results) ← ZULETZT
-```
-
-**Grund:** Athleten benötigen bestehende Länder, und Ergebnisse benötigen bestehende Athleten.
+1. **Countries**
+2. **Athletes**
+3. **Results**
 
 ---
 
-## 📁 Unterstützte Dateiformate
+## ⚠️ Important: Import Order
+
+The import order is **CRITICAL**. Please follow this order:
+
+```
+1️⃣  COUNTRIES ← FIRST
+2️⃣  ATHLETES ← SECOND
+3️⃣  RESULTS ← LAST
+```
+
+**Reason:** Athletes need existing countries, and results need existing athletes.
+
+---
+
+## 📁 Supported File Formats
 
 - ✅ **Excel**: `.xlsx`, `.xls`
-- ✅ **CSV**: `.csv` (mit Komma-Trennzeichen)
+- ✅ **CSV**: `.csv` (with comma separator)
 
 ---
 
-## 1️⃣ Länder (Countries) importieren
+## 1️⃣ Importing Countries
 
-### 📋 Spaltenstruktur
+### 📋 Column Structure
 
-| Spalte | Name | Datentyp | Erforderlich | Beschreibung |
-|--------|------|----------|--------------|--------------|
-| A | `code` | String (2-3 Zeichen) | ✅ Ja | Ländercode (z.B. "us", "de", "fr") - **Case-insensitive** |
-| B | `name` | String | ✅ Ja | Vollständiger Länder-Name (z.B. "United States") |
+| Column | Name | Data Type | Required | Description |
+|--------|------|-----------|----------|-------------|
+| A | `code` | String (2-3 chars) | ✅ Yes | Country code (e.g. "us", "de", "fr") - **Case-insensitive** |
+| B | `name` | String | ✅ Yes | Full country name (e.g. "United States") |
 
-### 📝 Beispiel-Datei (countries.csv)
+### 📝 Example File (countries.csv)
 
 ```csv
 code,name
@@ -56,25 +56,25 @@ it,Italy
 es,Spain
 ```
 
-### 📌 Regeln & Anforderungen
+### 📌 Rules & Requirements
 
-| Regel | Beschreibung |
-|-------|--------------|
-| **Eindeutigkeit** | Der `code` muss eindeutig sein - Duplikate werden abgelehnt |
-| **Format** | Der `code` wird automatisch in **Kleinbuchstaben** konvertiert |
-| **Länge** | `code` sollte 2-3 Zeichen lang sein |
-| **Name** | Darf nicht leer sein |
-| **Header** | Die erste Zeile MUSS die Spaltennamen enthalten (`code`, `name`) |
+| Rule | Description |
+|------|-------------|
+| **Uniqueness** | The `code` must be unique - duplicates are rejected |
+| **Format** | The `code` is automatically converted to **lowercase** |
+| **Length** | `code` should be 2-3 characters long |
+| **Name** | Must not be empty |
+| **Header** | First line MUST contain column names (`code`, `name`) |
 
-### ❌ Häufige Fehler
+### ❌ Common Errors
 
-| Fehler | Grund | Lösung |
-|--------|-------|--------|
-| `DUPLICATE_COUNTRY` | Ländercode existiert bereits | Code überprüfen oder Duplifikate entfernen |
-| `INVALID_DATA` | Name ist leer | Sicherstellen, dass alle Länder einen Namen haben |
-| `MISSING_HEADER` | Header-Zeile fehlt | Erste Zeile muss `code,name` enthalten |
+| Error | Reason | Solution |
+|-------|--------|----------|
+| `DUPLICATE_COUNTRY` | Country code already exists | Check code or remove duplicates |
+| `INVALID_DATA` | Name is empty | Ensure all countries have a name |
+| `MISSING_HEADER` | Header line missing | First line must contain `code,name` |
 
-### ✅ Erfolgreiche Antwort
+### ✅ Successful Response
 
 ```json
 {
@@ -91,18 +91,18 @@ es,Spain
 
 ---
 
-## 2️⃣ Athleten (Athletes) importieren
+## 2️⃣ Importing Athletes
 
-### 📋 Spaltenstruktur
+### 📋 Column Structure
 
-| Spalte | Name | Datentyp | Erforderlich | Beschreibung |
-|--------|------|----------|--------------|--------------|
-| A | `firstName` | String | ✅ Ja | Vorname des Athleten |
-| B | `lastName` | String | ✅ Ja | Nachname des Athleten |
-| C | `countryCode` | String (2-3 Zeichen) | ✅ Ja | Ländercode (muss in Countries existieren) - **Case-insensitive** |
-| D | `gender` | String (M/F oder m/f) | ❌ Optional | Geschlecht: `M` (Männlich) oder `F` (Weiblich) |
+| Column | Name | Data Type | Required | Description |
+|--------|------|-----------|----------|-------------|
+| A | `firstName` | String | ✅ Yes | Athlete's first name |
+| B | `lastName` | String | ✅ Yes | Athlete's last name |
+| C | `countryCode` | String (2-3 chars) | ✅ Yes | Country code (must exist in Countries) - **Case-insensitive** |
+| D | `gender` | String (M/F or m/f) | ❌ Optional | Gender: `M` (Male) or `F` (Female) |
 
-### 📝 Beispiel-Datei (athletes.csv)
+### 📝 Example File (athletes.csv)
 
 ```csv
 firstName,lastName,countryCode,gender
@@ -118,31 +118,31 @@ Yuzuru,Hanyu,jp,M
 Ireen,Wust,nl,F
 ```
 
-### 📌 Regeln & Anforderungen
+### 📌 Rules & Requirements
 
-| Regel | Beschreibung |
-|-------|--------------|
-| **Ländercode** | Der `countryCode` muss in der Countries-Tabelle existieren, sonst wird der Import fehlgeschlagen |
-| **Eindeutigkeit** | Der Kombinationsname (firstName + lastName) sollte eindeutig sein, wird aber technisch nicht erzwungen |
-| **Geschlecht** | Nur `M` oder `F` akzeptiert. Andere Werte oder leere Werte sind zulässig |
-| **Header** | Die erste Zeile muss Spaltennamen enthalten: `firstName`, `lastName`, `countryCode` (und optional `gender`) |
-| **Namen** | Dürfen nicht leer sein |
-| **Case-Insensitivity** | Ländercode wird automatisch in Kleinbuchstaben konvertiert |
+| Rule | Description |
+|------|-------------|
+| **Country Code** | The `countryCode` must exist in the Countries table, otherwise the import fails |
+| **Uniqueness** | The combination name (firstName + lastName) should be unique but is not technically enforced |
+| **Gender** | Only `M` or `F` accepted. Other values or empty values are allowed |
+| **Header** | First line must contain column names: `firstName`, `lastName`, `countryCode` (and optionally `gender`) |
+| **Names** | Must not be empty |
+| **Case-Insensitivity** | Country code is automatically converted to lowercase |
 
-### ❌ Häufige Fehler
+### ❌ Common Errors
 
-| Fehler | Grund | Lösung |
-|--------|-------|--------|
-| `ATHLETE_COUNTRY_NOT_FOUND` | Ländercode existiert nicht | Sicherstellen, dass das Land zuvor importiert wurde |
-| `INVALID_DATA` | Name ist leer | Beide Namen (firstName, lastName) müssen angegeben sein |
-| `MISSING_HEADER` | Header-Zeile fehlt | Erste Zeile muss die Spaltennamen enthalten |
-| `INVALID_GENDER` | Ungültiges Geschlechtsformat | Nur `M` oder `F` verwenden (oder Feld leer lassen) |
+| Error | Reason | Solution |
+|-------|--------|----------|
+| `ATHLETE_COUNTRY_NOT_FOUND` | Country code does not exist | Ensure the country was imported first |
+| `INVALID_DATA` | Name is empty | Both names (firstName, lastName) must be provided |
+| `MISSING_HEADER` | Header line missing | First line must contain column names |
+| `INVALID_GENDER` | Invalid gender format | Only use `M` or `F` (or leave field empty) |
 
-### ⚠️ Wichtiger Hinweis
+### ⚠️ Important Note
 
-**Länder müssen VOR dem Import von Athleten existieren!** Andernfalls wird der Import mit `ATHLETE_COUNTRY_NOT_FOUND` fehlschlagen.
+**Countries must exist BEFORE importing athletes!** Otherwise the import will fail with `ATHLETE_COUNTRY_NOT_FOUND`.
 
-### ✅ Erfolgreiche Antwort
+### ✅ Successful Response
 
 ```json
 {
@@ -159,21 +159,21 @@ Ireen,Wust,nl,F
 
 ---
 
-## 3️⃣ Ergebnisse (Results) importieren
+## 3️⃣ Importing Results
 
-### 📋 Spaltenstruktur
+### 📋 Column Structure
 
-| Spalte | Name | Datentyp | Erforderlich | Beschreibung |
-|--------|------|----------|--------------|--------------|
-| A | `athleteFirstName` | String | ✅ Ja | Vorname des Athleten (muss in Athletes existieren) |
-| B | `athleteLastName` | String | ✅ Ja | Nachname des Athleten (muss in Athletes existieren) |
-| C | `sport` | String | ✅ Ja | Name der Sportart (z.B. "Alpine Skiing", "Biathlon") |
-| D | `rank` | Zahl (Integer) | ✅ Ja | Platzierung (z.B. 1, 2, 3) - muss ≥ 1 sein |
-| E | `timeOrPoints` | String/Zahl | ✅ Ja | Zeit oder Punkte (z.B. "1:32.03" oder "314.56") |
-| F | `scoreType` | String (PTS/WINS/TIME) | ❌ Optional | Bewertungstyp: `PTS` (Punkte), `WINS` (Siege), `TIME` (Zeit) |
-| G | `medal` | String (GOLD/SILVER/BRONZE) | ❌ Optional | Medaillentyp: `GOLD`, `SILVER`, `BRONZE` oder leer |
+| Column | Name | Data Type | Required | Description |
+|--------|------|-----------|----------|-------------|
+| A | `athleteFirstName` | String | ✅ Yes | Athlete's first name (must exist in Athletes) |
+| B | `athleteLastName` | String | ✅ Yes | Athlete's last name (must exist in Athletes) |
+| C | `sport` | String | ✅ Yes | Sport name (e.g. "Alpine Skiing", "Biathlon") |
+| D | `rank` | Number (Integer) | ✅ Yes | Ranking (e.g. 1, 2, 3) - must be ≥ 1 |
+| E | `timeOrPoints` | String/Number | ✅ Yes | Time or points (e.g. "1:32.03" or "314.56") |
+| F | `scoreType` | String (PTS/WINS/TIME) | ❌ Optional | Score type: `PTS` (Points), `WINS` (Wins), `TIME` (Time) |
+| G | `medal` | String (GOLD/SILVER/BRONZE) | ❌ Optional | Medal type: `GOLD`, `SILVER`, `BRONZE` or empty |
 
-### 📝 Beispiel-Datei (results.csv)
+### 📝 Example File (results.csv)
 
 ```csv
 athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
@@ -187,58 +187,58 @@ Yuzuru,Hanyu,Figure Skating,2,312.45,PTS,SILVER
 Ireen,Wust,Speed Skating,1,1:43.50,TIME,GOLD
 ```
 
-### 📌 Regeln & Anforderungen
+### 📌 Rules & Requirements
 
-| Regel | Beschreibung |
-|-------|--------------|
-| **Athlet-Existenz** | Der Athlet (mit firstName + lastName) muss in der Athletes-Tabelle existieren |
-| **Platzierung** | Der `rank` muss eine positive ganze Zahl (≥ 1) sein |
-| **Zeit/Punkte Format** | Kann verschiedene Formate haben: `1:32.03` (Zeit), `314.56` (Punkte), `23:45.2` (Zeit mit ms) |
-| **ScoreType** | Nur `PTS`, `WINS` oder `TIME` akzeptiert. Optional, Standard ist keine Angabe |
-| **Medal** | Nur `GOLD`, `SILVER`, `BRONZE` oder leer. **Case-sensitive!** |
-| **Header** | Die erste Zeile muss Spaltennamen enthalten |
-| **Sportart** | Die Sportart wird wie angegeben gespeichert - Schreibweise ist wichtig |
+| Rule | Description |
+|------|-------------|
+| **Athlete Existence** | The athlete (with firstName + lastName) must exist in the Athletes table |
+| **Ranking** | The `rank` must be a positive integer (≥ 1) |
+| **Time/Points Format** | Can have various formats: `1:32.03` (time), `314.56` (points), `23:45.2` (time with ms) |
+| **ScoreType** | Only `PTS`, `WINS` or `TIME` accepted. Optional, default is no specification |
+| **Medal** | Only `GOLD`, `SILVER`, `BRONZE` or empty. **Case-sensitive!** |
+| **Header** | First line must contain column names |
+| **Sport** | Sport name is saved as specified - spelling is important |
 
-### ✅ Gültige Zeit-Formate
+### ✅ Valid Time Formats
 
 ```
-"1:32.03"       → MM:SS.MS (Minuten:Sekunden.Millisekunden)
-"32.03"         → SS.MS (Sekunden.Millisekunden)
-"1:02:30.5"     → HH:MM:SS.MS (Stunden:Minuten:Sekunden.Millisekunden)
+"1:32.03"       → MM:SS.MS (Minutes:Seconds.Milliseconds)
+"32.03"         → SS.MS (Seconds.Milliseconds)
+"1:02:30.5"     → HH:MM:SS.MS (Hours:Minutes:Seconds.Milliseconds)
 "2:30"          → MM:SS
 ```
 
-### ✅ Gültige Punkte-Formate
+### ✅ Valid Points Formats
 
 ```
-"314.56"        → Dezimalzahl
-"100"           → Ganzzahl
-"3.5"           → Dezimalzahl mit Komma
+"314.56"        → Decimal number
+"100"           → Integer
+"3.5"           → Decimal number with comma
 ```
 
-### ❌ Häufige Fehler
+### ❌ Common Errors
 
-| Fehler | Grund | Lösung |
-|--------|-------|--------|
-| `ATHLETE_NOT_FOUND` | Athlet existiert nicht | Sicherstellen, dass Athletes importiert wurden und Namen korrekt sind |
-| `INVALID_NUMBER_FORMAT` | rank oder timeOrPoints falsch formatiert | Rank muss integer, timeOrPoints kann Zeit oder Zahl sein |
-| `INVALID_RANK` | Rank ist ≤ 0 | rank muss ≥ 1 sein |
-| `INVALID_MEDAL` | Ungültiges Medaillen-Format | Nur `GOLD`, `SILVER`, `BRONZE` (groß geschrieben) |
-| `INVALID_SCORE_TYPE` | Ungültiger scoreType | Nur `PTS`, `WINS`, `TIME` (groß geschrieben) |
+| Error | Reason | Solution |
+|-------|--------|----------|
+| `ATHLETE_NOT_FOUND` | Athlete does not exist | Ensure athletes were imported and names are correct |
+| `INVALID_NUMBER_FORMAT` | rank or timeOrPoints formatted incorrectly | Rank must be integer, timeOrPoints can be time or number |
+| `INVALID_RANK` | Rank is ≤ 0 | rank must be ≥ 1 |
+| `INVALID_MEDAL` | Invalid medal format | Only `GOLD`, `SILVER`, `BRONZE` (uppercase) |
+| `INVALID_SCORE_TYPE` | Invalid scoreType | Only `PTS`, `WINS`, `TIME` (uppercase) |
 
-### ⚠️ Wichtige Hinweise
+### ⚠️ Important Notes
 
-1. **Athleten müssen VOR dem Import von Ergebnissen existieren!** Andernfalls wird der Import mit `ATHLETE_NOT_FOUND` fehlschlagen.
+1. **Athletes must exist BEFORE importing results!** Otherwise the import will fail with `ATHLETE_NOT_FOUND`.
 
-2. **Namen müssen exakt übereinstimmen!** (Groß-/Kleinschreibung wird beachtet)
-   - Richtig: ✅ `Sofia` + `Goggia`
-   - Falsch: ❌ `sofia` + `goggia` oder `Sofia` + `goggia`
+2. **Names must match exactly!** (Case-sensitive)
+   - Correct: ✅ `Sofia` + `Goggia`
+   - Wrong: ❌ `sofia` + `goggia` or `Sofia` + `goggia`
 
-3. **Sportarten** - Werden wie angegeben übernommen. Verwenden Sie konsistent die gleiche Schreibweise:
-   - Richtig: ✅ Alle verwenden "Alpine Skiing"
-   - Falsch: ❌ Mix aus "Alpine Skiing", "alpine skiing", "AlpineSKIING"
+3. **Sports** - Are saved as specified. Use consistent spelling:
+   - Correct: ✅ All use "Alpine Skiing"
+   - Wrong: ❌ Mix of "Alpine Skiing", "alpine skiing", "AlpineSKIING"
 
-### ✅ Erfolgreiche Antwort
+### ✅ Successful Response
 
 ```json
 {
@@ -255,89 +255,89 @@ Ireen,Wust,Speed Skating,1,1:43.50,TIME,GOLD
 
 ---
 
-## 🚀 Schritt-für-Schritt Anleitung zum Import
+## 🚀 Step-by-Step Import Guide
 
-### Schritt 1: Länder vorbereiten & importieren
-
-```
-1. Datei "countries.csv" erstellen oder bereitstellen
-2. Sicherstellen, dass die Spalten korrekt sind: code, name
-3. Im Admin-Dashboard: Datei hochladen
-4. Import starten und auf Bestätigung warten
-✅ Länder sollten jetzt in der Datenbank existieren
-```
-
-### Schritt 2: Athleten vorbereiten & importieren
+### Step 1: Prepare & Import Countries
 
 ```
-1. Datei "athletes.csv" erstellen oder bereitstellen
-2. Sicherstellen, dass die Spalten korrekt sind: firstName, lastName, countryCode
-3. Überprüfen, dass alle countryCode-Werte in Countries existieren
-4. Im Admin-Dashboard: Datei hochladen
-5. Import starten und auf Bestätigung warten
-✅ Athleten sollten jetzt in der Datenbank existieren
+1. Create or provide "countries.csv" file
+2. Ensure columns are correct: code, name
+3. In Admin Dashboard: Upload file
+4. Start import and wait for confirmation
+✅ Countries should now exist in database
 ```
 
-### Schritt 3: Ergebnisse vorbereiten & importieren
+### Step 2: Prepare & Import Athletes
 
 ```
-1. Datei "results.csv" erstellen oder bereitstellen
-2. Sicherstellen, dass die Spalten korrekt sind: athleteFirstName, athleteLastName, sport, rank, timeOrPoints
-3. Überprüfen, dass alle athleteFirstName + athleteLastName-Kombinationen in Athletes existieren
-4. Im Admin-Dashboard: Datei hochladen
-5. Import starten und auf Bestätigung warten
-✅ Ergebnisse sollten jetzt in der Datenbank existieren
+1. Create or provide "athletes.csv" file
+2. Ensure columns are correct: firstName, lastName, countryCode
+3. Verify all countryCode values exist in Countries
+4. In Admin Dashboard: Upload file
+5. Start import and wait for confirmation
+✅ Athletes should now exist in database
+```
+
+### Step 3: Prepare & Import Results
+
+```
+1. Create or provide "results.csv" file
+2. Ensure columns are correct: athleteFirstName, athleteLastName, sport, rank, timeOrPoints
+3. Verify all athleteFirstName + athleteLastName combinations exist in Athletes
+4. In Admin Dashboard: Upload file
+5. Start import and wait for confirmation
+✅ Results should now exist in database
 ```
 
 ---
 
 ## 🛠️ Troubleshooting
 
-### Problem: "Import fehlgeschlagen mit 0 erfolgreichen Records"
+### Problem: "Import failed with 0 successful records"
 
-**Schritt 1:** Überprüfen Sie die Import-Logs im Admin-Dashboard
+**Step 1:** Check import logs in Admin Dashboard
 ```
-Suchen Sie nach: Import-Fehler → Klicken Sie auf das fehlgeschlagene Import-Log
-```
-
-**Schritt 2:** Lesen Sie die fehlgeschlagenen Zeilen
-```
-Jede fehlerhafte Zeile wird mit dem genauen Fehler aufgelistet
+Look for: Import Errors → Click on failed import log
 ```
 
-**Schritt 3:** Beheben Sie den Fehler
+**Step 2:** Read failed rows
 ```
-- COUNTRY_NOT_FOUND? → Länder zuerst importieren
-- ATHLETE_NOT_FOUND? → Athletes zuerst importieren
-- Formatfehler? → Siehe Spalten-Format oben
+Each failed row is listed with the exact error
 ```
 
-### Problem: "Einige Zeilen sind fehlgeschlagen, andere erfolgreich"
-
+**Step 3:** Fix the error
 ```
-✅ Das ist normal - die erfolgreich importierten Zeilen werden gespeichert
-❌ Die fehlgeschlagenen Zeilen werden nicht importiert
-→ Beheben Sie die Fehler in den fehlgeschlagenen Zeilen
-→ Importieren Sie diese erneut
+- COUNTRY_NOT_FOUND? → Import countries first
+- ATHLETE_NOT_FOUND? → Import athletes first
+- Format error? → See column format above
 ```
 
-### Problem: "Cache zeigt alte Daten nach Import"
+### Problem: "Some rows failed, others successful"
 
 ```
-1. Warten Sie 1-2 Minuten (Cache wird automatisch aktualisiert)
-   oder
-2. Führen Sie einen Seitenaktualisierung durch (F5 oder Ctrl+R)
-   oder
-3. Kontaktieren Sie einen Admin zum manuellen Cache-Clear
+✅ This is normal - successfully imported rows are saved
+❌ Failed rows are not imported
+→ Fix errors in failed rows
+→ Import them again
+```
+
+### Problem: "Cache shows old data after import"
+
+```
+1. Wait 1-2 minutes (cache updates automatically)
+   or
+2. Refresh page (F5 or Ctrl+R)
+   or
+3. Contact admin for manual cache clear
 ```
 
 ---
 
-## 📊 Beispiel: Vollständiger Import-Workflow
+## 📊 Example: Complete Import Workflow
 
-Hier ist ein Beispiel eines vollständigen Import-Workflows mit realen Daten:
+Here is an example of a complete import workflow with real data:
 
-### 📁 Datei 1: countries.csv
+### 📁 File 1: countries.csv
 ```csv
 code,name
 de,Germany
@@ -345,7 +345,7 @@ ch,Switzerland
 at,Austria
 ```
 
-### 📁 Datei 2: athletes.csv
+### 📁 File 2: athletes.csv
 ```csv
 firstName,lastName,countryCode,gender
 Anna,Fenninger,at,F
@@ -353,7 +353,7 @@ Marcel,Hirscher,at,M
 Lindsey,Vonn,us,F
 ```
 
-### 📁 Datei 3: results.csv
+### 📁 File 3: results.csv
 ```csv
 athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
 Anna,Fenninger,Alpine Skiing,1,1:45.23,TIME,GOLD
@@ -361,48 +361,48 @@ Marcel,Hirscher,Alpine Skiing,2,1:45.67,TIME,SILVER
 Lindsey,Vonn,Alpine Skiing,3,1:46.12,TIME,BRONZE
 ```
 
-### 🎯 Import-Ablauf:
+### 🎯 Import Process:
 ```
-1. countries.csv importieren → 3 Länder erfolgreich
-2. athletes.csv importieren → 3 Athleten erfolgreich (bei "us" Fehler, da USA nicht in countries.csv)
-3. results.csv importieren → 3 Ergebnisse erfolgreich
+1. Import countries.csv → 3 countries successful
+2. Import athletes.csv → 3 athletes successful (error for "us" since USA not in countries.csv)
+3. Import results.csv → 3 results successful
 ```
 
 ---
 
-## 📞 Häufig gestellte Fragen
+## 📞 Frequently Asked Questions
 
-### F: Kann ich dieselbe Datei zweimal importieren?
-**A:** Nein, bei Ländern wird es zu Duplikat-Fehlern führen. Bei Athleten und Ergebnissen werden neue Einträge erstellt.
+### Q: Can I import the same file twice?
+**A:** No, for Countries it will result in duplicate errors. For Athletes and Results new entries are created.
 
-### F: Kann ich Excel statt CSV verwenden?
-**A:** Ja, `.xlsx` und `.xls` Dateien werden genauso akzeptiert wie CSV.
+### Q: Can I use Excel instead of CSV?
+**A:** Yes, `.xlsx` and `.xls` files are accepted the same as CSV.
 
-### F: Kann ich die Spaltenreihenfolge ändern?
-**A:** Nein, die Spaltenreihenfolge ist festgelegt. Die Spalten müssen in der angegebenen Reihenfolge sein, können aber die gleichen Namen haben.
+### Q: Can I change the column order?
+**A:** No, column order is fixed. Columns must be in the specified order, but can have the same names.
 
-### F: Unterscheiden sich die Länder nach Groß-/Kleinschreibung?
-**A:** Der Ländercode (`code`) wird automatisch in Kleinbuchstaben konvertiert, der Name wird so übernommen wie eingegeben.
+### Q: Are country codes case-sensitive?
+**A:** The country code (`code`) is automatically converted to lowercase, the name is saved as entered.
 
-### F: Was passiert mit Zeichen wie Umlauten (ä, ö, ü)?
-**A:** Umlaute und Sonderzeichen werden korrekt unterstützt und übernommen.
+### Q: Are special characters like umlauts (ä, ö, ü) supported?
+**A:** Yes, umlauts and special characters are fully supported and preserved.
 
-### F: Kann ich leere Zeilen in der Datei haben?
-**A:** Leere Zeilen am Ende werden ignoriert, aber leere Zeilen in der Mitte können zu Fehlern führen.
+### Q: Can I have empty rows in the file?
+**A:** Empty rows at the end are ignored, but empty rows in the middle can cause errors.
 
 ---
 
 ## 📞 Support
 
-Falls Sie Probleme beim Import haben:
+If you have problems with imports:
 
-1. **Überprüfen Sie die Logs** im Admin-Dashboard
-2. **Vergleichen Sie Ihre Datei** mit den Beispielen in diesem Dokument
-3. **Befolgen Sie die Import-Reihenfolge** (Countries → Athletes → Results)
-4. **Kontaktieren Sie einen Admin** bei technischen Problemen
+1. **Check the logs** in Admin Dashboard
+2. **Compare your file** with the examples in this document
+3. **Follow the import order** (Countries → Athletes → Results)
+4. **Contact an admin** for technical problems
 
 ---
 
-**Letzte Aktualisierung:** 28.03.2026
+**Last Updated:** 28.03.2026
 **Version:** 1.0
 
