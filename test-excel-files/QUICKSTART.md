@@ -4,11 +4,6 @@
 
 ✅ **CSV-Dateien (einfaches Textformat):**
 - `countries_test.csv` - 10 Länder
-- `athletes_test.csv` - 10 Athleten  
-- `results_test.csv` - 10 Ergebnisse
-
-✅ **Excel-Dateien (.xlsx modern format):**
-- `countries_test.xlsx` - 10 Länder
 - `athletes_test.xlsx` - 10 Athleten
 - `results_test.xlsx` - 10 Ergebnisse
 
@@ -16,6 +11,11 @@
 - `run_import_tests.ps1` - PowerShell Automation (empfohlen)
 - `run_import_tests.bat` - Batch Automation
 - `README_TEST_FILES.md` - Detaillierte Dokumentation
+- `athletes_broken.csv` - Fehlerhafte Daten
+- `results_test.csv` - 8 Ergebnisse (CSV-Format)
+- `results_broken.csv` - Fehlerhafte Daten
+
+**Gesamt: 9 Dateien** (statt früher 22)
 
 ---
 
@@ -97,7 +97,7 @@ Alle 10 Athletes mit Ranks (1-2), verschiedene ScoreTypes (TIME, PTS, WINS), Med
 | Results | CSV | 10/10 | ✅ |
 | Results | XLSX | 10/10 | ✅ |
 
-*Hinweis: Im zweiten Test können Duplikate entstehen  
+*Hinweis: Im zweiten Test können Duplikate entstehen
 **Hinweis: Abhängig davon, ob alle Countries bereits importiert sind
 
 ---

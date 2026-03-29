@@ -56,8 +56,12 @@ public class ExcelParser {
 
                 String code = getCellValueAsString(row.getCell(0), rowNum, "code");
                 String name = getCellValueAsString(row.getCell(1), rowNum, "name");
+                String nameEn = row.getCell(2) != null ? row.getCell(2).getStringCellValue() : null;
+                String nameDe = row.getCell(3) != null ? row.getCell(3).getStringCellValue() : null;
+                String nameFr = row.getCell(4) != null ? row.getCell(4).getStringCellValue() : null;
 
-                countries.add(new CountryImportDto(code.trim(), name.trim()));
+                CountryImportDto dto = new CountryImportDto(code.trim(), name.trim(), nameEn, nameDe, nameFr);
+                countries.add(dto);
             }
         }
 
@@ -182,7 +186,10 @@ public class ExcelParser {
 
                 String code = getCsvValueByName(record, "code", rowNum, true);
                 String name = getCsvValueByName(record, "name", rowNum, true);
-                countries.add(new CountryImportDto(code, name));
+                String nameEn = getCsvValueByName(record, "nameEn", rowNum, false);
+                String nameDe = getCsvValueByName(record, "nameDe", rowNum, false);
+                String nameFr = getCsvValueByName(record, "nameFr", rowNum, false);
+                countries.add(new CountryImportDto(code, name, nameEn, nameDe, nameFr));
             }
         }
 

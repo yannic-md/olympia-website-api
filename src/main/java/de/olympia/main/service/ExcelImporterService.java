@@ -341,6 +341,9 @@ public class ExcelImporterService {
                     // UPSERT path: update existing country
                     country = existing.get();
                     country.setName(dto.getName());
+                    country.setNameEn(dto.getNameEn());
+                    country.setNameDe(dto.getNameDe());
+                    country.setNameFr(dto.getNameFr());
                     country = countryRepository.save(country);
                     action = ImportDetail.ImportAction.UPDATE;
                     importLog.setSuccessfulRecords(importLog.getSuccessfulRecords() + 1);
@@ -350,6 +353,9 @@ public class ExcelImporterService {
                     country = new Country();
                     country.setCode(dto.getCode());
                     country.setName(dto.getName());
+                    country.setNameEn(dto.getNameEn());
+                    country.setNameDe(dto.getNameDe());
+                    country.setNameFr(dto.getNameFr());
                     country = countryRepository.save(country);
                     action = ImportDetail.ImportAction.INSERT;
                     importLog.setSuccessfulRecords(importLog.getSuccessfulRecords() + 1);

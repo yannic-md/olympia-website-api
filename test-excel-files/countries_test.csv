@@ -1,12 +1,12 @@
-code,name
-us,United States
-de,Germany
-fr,France
-gb,Great Britain
-jp,Japan
-cn,China
-au,Australia
-ca,Canada
-it,Italy
-es,Spain
+code,name,nameEn,nameDe,nameFr
+us,United States,United States,Vereinigte Staaten,États-Unis
+de,Germany,Germany,Deutschland,Allemagne
+fr,France,France,Frankreich,France
+gb,Great Britain,Great Britain,Großbritannien,Grande-Bretagne
+jp,Japan,Japan,Japan,Japon
+cn,China,China,China,Chine
+au,Australia,Australia,Australien,Australie
+ca,Canada,Canada,Kanada,Canada
+it,Italy,Italy,Italien,Italie
+es,Spain,Spain,Spanien,Espagne
 

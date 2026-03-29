@@ -1,0 +1,7 @@
+athleteFirstName,athleteLastName,sport,rank,timeOrPoints,scoreType,medal
+Sofia,Goggia,Alpine Skiing,1,1:32.03,TIME,GOLD
+Mikaela,InvalidAthlete,Alpine Skiing,2,1:32.47,TIME,SILVER
+Petra,Vlhova,Alpine Skiing,x,1:32.88,INVALID_TYPE,BRONZE
+Johannes,Boe,Biathlon,1,invalid_time,TIME,GOLD
+Marte,Roeiseland,Biathlon,2,20:23.1,TIME,INVALID_MEDAL
+
