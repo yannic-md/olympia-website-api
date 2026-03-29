@@ -25,7 +25,24 @@ import java.util.Locale;
 public class ExcelParser {
 
     /**
-     * Parse countries from Excel or CSV file
+     * Parst Längerdaten aus einer Excel oder CSV Datei.
+     * 
+     * Diese Methode verarbeitet die Upload-Datei und extrahiert Längerdaten. Je nach
+     * Dateityp (CSV oder Excel) wird ein entsprechender Parser aufgerufen. Die Datei
+     * wird zeilenweise gelesen und jede Zeile wird validiert. Leerzeilen werden übersprungen,
+     * die Header-Zeile wird ignoriert.
+     * 
+     * Spaltenformat (Excel/CSV):
+     * - Spalte 0/1: code (erforderlich) - ISO-Code des Landes
+     * - Spalte 1: name (erforderlich) - Name des Landes
+     * - Spalte 2: nameEn (optional) - Name in Englisch
+     * - Spalte 3: nameDe (optional) - Name in Deutsch
+     * - Spalte 4: nameFr (optional) - Name in Französisch
+     * 
+     * @param file die zu parsende Datei (Excel .xlsx/.xls oder CSV)
+     * @return Liste von CountryImportDto Objekten mit den geparsten Längerdaten
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn die Datei ungültig ist oder erforderliche Felder fehlen
      */
     public List<CountryImportDto> parseCountries(MultipartFile file) throws IOException {
         if (isCsvFile(file)) {
@@ -69,7 +86,21 @@ public class ExcelParser {
     }
 
     /**
-     * Parse athletes from Excel or CSV file
+     * Parst Athletendaten aus einer Excel oder CSV Datei.
+     * 
+     * Diese Methode verarbeitet die Upload-Datei und extrahiert Informationen über Athleten.
+     * Je nach Dateityp (CSV oder Excel) wird ein entsprechender Parser aufgerufen. Die Datei
+     * wird zeilenweise gelesen, Leerzeilen werden übersprungen und die Header-Zeile ignoriert.
+     * 
+     * Spaltenformat (Excel/CSV):
+     * - Spalte 0: firstName (erforderlich) - Vorname des Athleten
+     * - Spalte 1: lastName (erforderlich) - Nachname des Athleten
+     * - Spalte 2: countryCode (optional) - ISO-Code des Landes des Athleten
+     * 
+     * @param file die zu parsende Datei (Excel .xlsx/.xls oder CSV)
+     * @return Liste von AthleteImportDto Objekten mit den geparsten Athletendaten
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn erforderliche Felder fehlen oder Datentypen falsch sind
      */
     public List<AthleteImportDto> parseAthletes(MultipartFile file) throws IOException {
         if (isCsvFile(file)) {
@@ -114,7 +145,26 @@ public class ExcelParser {
     }
 
     /**
-     * Parse results from Excel or CSV file
+     * Parst Wettkampfergebnisse aus einer Excel oder CSV Datei.
+     * 
+     * Diese Methode verarbeitet die Upload-Datei und extrahiert Ergebnisdaten von Athleten
+     * in verschiedenen Sportarten. Je nach Dateityp (CSV oder Excel) wird ein entsprechender
+     * Parser aufgerufen. Die Datei wird zeilenweise verarbeitet, Leerzeilen ignoriert und
+     * die Header-Zeile übersprungen. Ergebnisse können Zeiten, Punkte oder Medaillen enthalten.
+     * 
+     * Spaltenformat (Excel/CSV):
+     * - Spalte 0: athleteFirstName (erforderlich) - Vorname des Athleten
+     * - Spalte 1: athleteLastName (erforderlich) - Nachname des Athleten
+     * - Spalte 2: sport (erforderlich) - Name der Sportart
+     * - Spalte 3: rank (erforderlich) - Platzierung/Rang als Ganzzahl
+     * - Spalte 4: timeOrPoints (optional) - Zeitleistung oder Punktzahl
+     * - Spalte 5: scoreType (optional) - Typ der Bewertung (z.B. "TIME" oder "POINTS")
+     * - Spalte 6: medal (optional) - Gewonnene Medaille (z.B. "GOLD", "SILVER", "BRONZE")
+     * 
+     * @param file die zu parsende Datei (Excel .xlsx/.xls oder CSV)
+     * @return Liste von ResultImportDto Objekten mit den geparsten Ergebnisdaten
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn erforderliche Felder fehlen oder Datentypen falsch sind
      */
     public List<ResultImportDto> parseResults(MultipartFile file) throws IOException {
         if (isCsvFile(file)) {
@@ -166,6 +216,18 @@ public class ExcelParser {
         return results;
     }
 
+    /**
+     * Parst Längerdaten aus einer CSV-Datei.
+     * 
+     * Diese interne Hilfsmethode verarbeitet CSV-Dateien mit Längerdaten. Die Datei wird
+     * als UTF-8 gelesen und mit der Apache Commons CSV Bibliothek geparst. Die erste Zeile
+     * wird als Header interpretiert (Spaltennamen). Leerzeilen werden übersprungen.
+     * 
+     * @param file die zu parsende CSV-Datei
+     * @return Liste von CountryImportDto Objekten mit den geparsten Längerdaten
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn erforderliche Spalten fehlen oder Daten ungültig sind
+     */
     private List<CountryImportDto> parseCountriesCsv(MultipartFile file) throws IOException {
         List<CountryImportDto> countries = new ArrayList<>();
 
@@ -196,6 +258,18 @@ public class ExcelParser {
         return countries;
     }
 
+    /**
+     * Parst Athletendaten aus einer CSV-Datei.
+     * 
+     * Diese interne Hilfsmethode verarbeitet CSV-Dateien mit Athletendaten. Die Datei wird
+     * als UTF-8 gelesen und mit der Apache Commons CSV Bibliothek geparst. Die erste Zeile
+     * wird als Header interpretiert (Spaltennamen). Leerzeilen werden übersprungen.
+     * 
+     * @param file die zu parsende CSV-Datei
+     * @return Liste von AthleteImportDto Objekten mit den geparsten Athletendaten
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn erforderliche Spalten fehlen oder Daten ungültig sind
+     */
     private List<AthleteImportDto> parseAthletesCsv(MultipartFile file) throws IOException {
         List<AthleteImportDto> athletes = new ArrayList<>();
 
@@ -224,6 +298,19 @@ public class ExcelParser {
         return athletes;
     }
 
+    /**
+     * Parst Wettkampfergebnisse aus einer CSV-Datei.
+     * 
+     * Diese interne Hilfsmethode verarbeitet CSV-Dateien mit Ergebnisdaten. Die Datei wird
+     * als UTF-8 gelesen und mit der Apache Commons CSV Bibliothek geparst. Die erste Zeile
+     * wird als Header interpretiert (Spaltennamen). Leerzeilen werden übersprungen. Ergebnisse
+     * können Zeiten, Punkte und Medaillen enthalten.
+     * 
+     * @param file die zu parsende CSV-Datei
+     * @return Liste von ResultImportDto Objekten mit den geparsten Ergebnisdaten
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn erforderliche Spalten fehlen oder Daten ungültig sind
+     */
     private List<ResultImportDto> parseResultsCsv(MultipartFile file) throws IOException {
         List<ResultImportDto> results = new ArrayList<>();
 
@@ -266,7 +353,16 @@ public class ExcelParser {
     }
 
     /**
-     * Get workbook from file (supports both .xlsx and .xls)
+     * Erstellt ein Workbook-Objekt aus einer Excel-Datei.
+     * 
+     * Diese Methode prüft die Dateiendung und erstellt das entsprechende Workbook-Objekt:
+     * - .xlsx Dateien werden mit XSSFWorkbook (Excel 2007+) geöffnet
+     * - .xls Dateien werden mit HSSFWorkbook (Excel 97-2003) geöffnet
+     * 
+     * @param file die Excel-Datei, die geöffnet werden soll
+     * @return Workbook-Objekt (XSSFWorkbook oder HSSFWorkbook je nach Format)
+     * @throws IOException wenn die Datei nicht gelesen werden kann
+     * @throws InvalidImportDataException wenn die Datei keinen Namen hat oder ein nicht unterstütztes Format hat
      */
     private Workbook getWorkbook(MultipartFile file) throws IOException {
         String filename = file.getOriginalFilename();
@@ -286,11 +382,29 @@ public class ExcelParser {
         }
     }
 
+    /**
+     * Prüft, ob eine hochgeladene Datei eine CSV-Datei ist.
+     * 
+     * Diese Methode untersucht die Dateiendung (case-insensitive) um festzustellen,
+     * ob die Datei vom Typ CSV ist.
+     * 
+     * @param file die zu prüfende Datei
+     * @return true wenn die Datei .csv Endung hat, false sonst
+     */
     private boolean isCsvFile(MultipartFile file) {
         String filename = file.getOriginalFilename();
         return filename != null && filename.toLowerCase(Locale.ROOT).endsWith(".csv");
     }
 
+    /**
+     * Prüft, ob ein CSV-Record vollständig leer ist.
+     * 
+     * Ein CSV-Record wird als leer betrachtet, wenn alle Spalten null oder
+     * nur Whitespace enthalten. Dies ist hilfreich um Leerzeilen zu filtern.
+     * 
+     * @param record der zu prüfende CSV-Record
+     * @return true wenn alle Spalten des Records leer sind, false wenn mindestens ein Wert vorhanden ist
+     */
     private boolean isCsvRecordEmpty(CSVRecord record) {
         for (int i = 0; i < record.size(); i++) {
             String value = record.get(i);
@@ -301,6 +415,21 @@ public class ExcelParser {
         return true;
     }
 
+    /**
+     * Holt einen String-Wert aus einem CSV-Record anhand des Spaltennamens.
+     * 
+     * Diese Methode sucht nach einer benannten Spalte im CSV-Header und holt deren Wert.
+     * Bei erforderlichen Feldern wird eine Exception geworfen, wenn die Spalte fehlt oder
+     * der Wert leer ist. Bei optionalen Feldern wird null zurückgegeben, wenn die Spalte
+     * nicht existiert oder der Wert leer ist.
+     * 
+     * @param record der CSV-Record mit Spaltendaten
+     * @param columnName der Name der gesuchten Spalte (aus dem Header)
+     * @param rowNum die Zeilennummer (für Fehlerberichterstattung)
+     * @param required ob das Feld erforderlich ist
+     * @return der getrimmte Wert der Spalte oder null für optionale leere Felder
+     * @throws InvalidImportDataException wenn Spalte nicht existiert (erforderlich) oder Wert leer ist (erforderlich)
+     */
     private String getCsvValueByName(CSVRecord record, String columnName, int rowNum, boolean required) {
         String value = null;
         try {
@@ -333,6 +462,23 @@ public class ExcelParser {
         return (value == null || value.isEmpty()) ? null : value;
     }
 
+    /**
+     * Holt einen Integer-Wert aus einem CSV-Record anhand des Spaltennamens.
+     * 
+     * Diese Methode sucht nach einer benannten Spalte im CSV-Header und parst deren
+     * Wert zu einem Integer. Bei erforderlichen Feldern wird eine Exception geworfen,
+     * wenn die Spalte fehlt, der Wert leer ist oder kein Integer geparst werden kann.
+     * Bei optionalen Feldern wird null zurückgegeben, wenn die Spalte nicht existiert
+     * oder der Wert leer ist.
+     * 
+     * @param record der CSV-Record mit Spaltendaten
+     * @param columnName der Name der gesuchten Spalte (aus dem Header)
+     * @param rowNum die Zeilennummer (für Fehlerberichterstattung)
+     * @param required ob das Feld erforderlich ist
+     * @return der geparste Integer-Wert oder null für optionale leere Felder
+     * @throws InvalidImportDataException wenn Spalte nicht existiert (erforderlich), Wert leer ist (erforderlich),
+     *                                     oder Wert kein Integer ist
+     */
     private Integer getCsvIntegerValueByName(CSVRecord record, String columnName, int rowNum, boolean required) {
         String value = getCsvValueByName(record, columnName, rowNum, required);
         if (value == null) {
@@ -351,6 +497,22 @@ public class ExcelParser {
         }
     }
 
+    /**
+     * Holt einen String-Wert aus einem CSV-Record anhand des Spaltenindex.
+     * 
+     * Diese Methode liest einen Wert aus dem CSV-Record basierend auf dem Spaltenindex
+     * (anstelle des Spaltennamens). Bei erforderlichen Feldern wird eine Exception
+     * geworfen, wenn der Wert leer oder nicht vorhanden ist. Bei optionalen Feldern
+     * wird null zurückgegeben.
+     * 
+     * @param record der CSV-Record mit Spaltendaten
+     * @param index der Spaltenindex (0-basiert)
+     * @param rowNum die Zeilennummer (für Fehlerberichterstattung)
+     * @param fieldName der Feldname (für Fehlerberichterstattung)
+     * @param required ob das Feld erforderlich ist
+     * @return der getrimmte Wert oder null für optionale leere Felder
+     * @throws InvalidImportDataException wenn Wert leer ist und Feld erforderlich ist
+     */
     private String getCsvValue(CSVRecord record, int index, int rowNum, String fieldName, boolean required) {
         String value = index < record.size() ? record.get(index) : null;
         if (value != null) {
@@ -369,6 +531,22 @@ public class ExcelParser {
         return (value == null || value.isEmpty()) ? null : value;
     }
 
+    /**
+     * Holt einen Integer-Wert aus einem CSV-Record anhand des Spaltenindex.
+     * 
+     * Diese Methode liest einen Wert aus dem CSV-Record basierend auf dem Spaltenindex
+     * und parst ihn zu einem Integer. Bei erforderlichen Feldern wird eine Exception
+     * geworfen, wenn der Wert leer ist oder kein Integer geparst werden kann. Bei
+     * optionalen Feldern wird null zurückgegeben, wenn der Wert leer ist.
+     * 
+     * @param record der CSV-Record mit Spaltendaten
+     * @param index der Spaltenindex (0-basiert)
+     * @param rowNum die Zeilennummer (für Fehlerberichterstattung)
+     * @param fieldName der Feldname (für Fehlerberichterstattung)
+     * @param required ob das Feld erforderlich ist
+     * @return der geparste Integer-Wert oder null für optionale leere Felder
+     * @throws InvalidImportDataException wenn Wert leer ist (erforderlich) oder kein Integer geparst werden kann
+     */
     private Integer getCsvIntegerValue(CSVRecord record, int index, int rowNum, String fieldName, boolean required) {
         String value = getCsvValue(record, index, rowNum, fieldName, required);
         if (value == null) {
@@ -388,7 +566,14 @@ public class ExcelParser {
     }
 
     /**
-     * Check if a row is empty
+     * Prüft, ob eine Excel-Zeile vollständig leer ist.
+     * 
+     * Eine Zeile wird als leer betrachtet, wenn:
+     * - die Zeile selbst null ist, oder
+     * - alle Zellen in der Zeile blank oder null sind
+     * 
+     * @param row die zu prüfende Excel-Zeile
+     * @return true wenn die Zeile leer ist, false wenn sie Daten enthält
      */
     private boolean isRowEmpty(Row row) {
         if (row == null) {
@@ -405,7 +590,17 @@ public class ExcelParser {
     }
 
     /**
-     * Get cell value as string
+     * Holt den String-Wert aus einer erforderlichen Excel-Zelle.
+     * 
+     * Diese Methode liest einen Zellwert und konvertiert ihn zu einem String.
+     * Sie unterstützt STRING- und NUMERIC-Zelltypen. NUMERIC-Werte werden als
+     * ganzzahlige Werte konvertiert. Null oder leere Zellen werfen eine Exception.
+     * 
+     * @param cell die zu lesende Zelle
+     * @param rowNum die Zeilennummer (für Fehlerberichterstattung)
+     * @param fieldName der Feldname (für Fehlerberichterstattung)
+     * @return String-Wert der Zelle
+     * @throws InvalidImportDataException wenn Zelle null/leer ist oder ein ungültiger Zelltyp vorliegt
      */
     private String getCellValueAsString(Cell cell, int rowNum, String fieldName) {
         if (cell == null) {
@@ -432,7 +627,15 @@ public class ExcelParser {
     }
 
     /**
-     * Get cell value as string (optional - returns null if cell is blank or null)
+     * Holt den String-Wert aus einer optionalen Excel-Zelle.
+     * 
+     * Diese Methode liest einen Zellwert und konvertiert ihn zu einem String, wobei
+     * null oder leere Zellen akzeptiert werden. Sie unterstützt STRING- und NUMERIC-Zelltypen.
+     * NUMERIC-Werte werden als ganzzahlige Werte konvertiert. Leere Strings werden als null zurückgegeben.
+     * 
+     * @param cell die zu lesende Zelle (kann null sein)
+     * @param rowNum die Zeilennummer (für zukünftige Fehlerberichterstattung)
+     * @return String-Wert der Zelle oder null wenn leer/blank
      */
     private String getCellValueAsStringOptional(Cell cell, int rowNum) {
         if (cell == null || cell.getCellType() == CellType.BLANK) {
@@ -450,7 +653,18 @@ public class ExcelParser {
     }
 
     /**
-     * Get cell value as integer
+     * Holt den Integer-Wert aus einer erforderlichen Excel-Zelle.
+     * 
+     * Diese Methode liest einen Zellwert und konvertiert ihn zu einem Integer.
+     * Sie unterstützt NUMERIC-Zelltypen direkt sowie STRING-Zelltypen (mit Parsing).
+     * Null oder leere Zellen werfen eine Exception. Invalid integer values werfen ebenfalls eine Exception.
+     * 
+     * @param cell die zu lesende Zelle
+     * @param rowNum die Zeilennummer (für Fehlerberichterstattung)
+     * @param fieldName der Feldname (für Fehlerberichterstattung)
+     * @return Integer-Wert der Zelle
+     * @throws InvalidImportDataException wenn Zelle null/leer ist, kein Integer konvertiert werden kann,
+     *                                     oder ein ungültiger Zelltyp vorliegt
      */
     private Integer getCellValueAsInteger(Cell cell, int rowNum, String fieldName) {
         if (cell == null) {

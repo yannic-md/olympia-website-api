@@ -27,8 +27,19 @@ public class ImportController {
     }
 
     /**
-     * Import countries from Excel or CSV file
-     * Admin-only endpoint
+     * Importiert Länder aus einer Excel oder CSV Datei.
+     * 
+     * Dieses Endpunkt ist nur für Administratoren verfügbar und ermöglicht den
+     * Massenimport von Ländern. Die Datei wird validiert, geparst und verarbeitet.
+     * Bei erfolgreicher Verarbeitung wird ein ImportLog mit Details erstellt.
+     * 
+     * Unterstützte Dateiformate: .xlsx, .xls, .csv
+     * 
+     * @param file die hochzuladende Datei mit Längerdaten. Darf nicht leer sein.
+     * @param userId optionale Admin-ID, die den Import durchführt. Wenn nicht angegeben,
+     *               wird eine Standard-Admin-ID verwendet.
+     * @return ResponseEntity mit ImportResponseDto enthält Status, Anzahl erfolgreicher/fehlgeschlagener
+     *         Datensätze und eventuelle Fehler. HTTP 200 bei Erfolg, 400 bei Fehler.
      */
     @PostMapping("/countries")
     public ResponseEntity<ImportResponseDto> importCountries(
@@ -71,8 +82,21 @@ public class ImportController {
     }
 
     /**
-     * Import athletes from Excel or CSV file
-     * Admin-only endpoint
+     * Importiert Athleten aus einer Excel oder CSV Datei.
+     * 
+     * Dieses Endpunkt ist nur für Administratoren verfügbar und ermöglicht den
+     * Massenimport von Athleten mit ihren Länderinformationen. Die Datei wird
+     * validiert, geparst und verarbeitet. Vorhandene Athleten können aktualisiert
+     * oder neue hinzugefügt werden.
+     * 
+     * Unterstützte Dateiformate: .xlsx, .xls, .csv
+     * 
+     * @param file die hochzuladende Datei mit Athletendaten. Muss Spalten für
+     *             Vorname, Nachname und Ländercode enthalten.
+     * @param userId optionale Admin-ID, die den Import durchführt. Wenn nicht angegeben,
+     *               wird eine Standard-Admin-ID verwendet.
+     * @return ResponseEntity mit ImportResponseDto enthält Status, Anzahl erfolgreicher/fehlgeschlagener
+     *         Datensätze und Details zu Validierungsfehlern. HTTP 200 bei Erfolg, 400 bei Fehler.
      */
     @PostMapping("/athletes")
     public ResponseEntity<ImportResponseDto> importAthletes(
@@ -115,8 +139,20 @@ public class ImportController {
     }
 
     /**
-     * Import results from Excel or CSV file
-     * Admin-only endpoint
+     * Importiert Wettkampfergebnisse aus einer Excel oder CSV Datei.
+     * 
+     * Dieses Endpunkt ist nur für Administratoren verfügbar und ermöglicht den
+     * Massenimport von Ergebnissen. Die Datei wird validiert, geparst und verarbeitet.
+     * Jedes Ergebnis wird mit dem entsprechenden Athleten und Sportart verknüpft.
+     * 
+     * Unterstützte Dateiformate: .xlsx, .xls, .csv
+     * 
+     * @param file die hochzuladende Datei mit Ergebnisdaten. Muss Spalten für
+     *             Athletenname, Sportart, Rang und Zeitleistung/Punkte enthalten.
+     * @param userId optionale Admin-ID, die den Import durchführt. Wenn nicht angegeben,
+     *               wird eine Standard-Admin-ID verwendet.
+     * @return ResponseEntity mit ImportResponseDto enthält Status, Anzahl erfolgreicher/fehlgeschlagener
+     *         Datensätze und Fehlerdetails pro Zeile. HTTP 200 bei Erfolg, 400 bei Fehler.
      */
     @PostMapping("/results")
     public ResponseEntity<ImportResponseDto> importResults(
@@ -159,7 +195,15 @@ public class ImportController {
     }
 
     /**
-     * Build response DTO from ImportLog
+     * Erstellt eine ResponseEntity aus einem ImportLog.
+     * 
+     * Diese Hilfsmethode konvertiert ein ImportLog-Objekt in eine ResponseEntity mit einem
+     * ImportResponseDto. Sie holt alle zugehörigen Fehler aus der Datenbank und mappet sie
+     * in die Response. Der HTTP-Statuscode wird basierend auf dem Import-Status gesetzt
+     * (OK für COMPLETED, BAD_REQUEST für andere Status).
+     * 
+     * @param importLog das zu konvertierende ImportLog mit Import-Metadaten und Status
+     * @return ResponseEntity mit ImportResponseDto und entsprechendem HTTP-Statuscode
      */
     private ResponseEntity<ImportResponseDto> buildResponse(ImportLog importLog) {
         var errors = importErrorRepository.findByImportLogId(importLog.getId())
@@ -193,7 +237,14 @@ public class ImportController {
     }
 
     /**
-     * Format response message
+     * Formatiert eine benutzerfreundliche Nachricht aus einem ImportLog.
+     * 
+     * Diese Hilfsmethode erzeugt je nach Import-Status unterschiedliche Nachrichten:
+     * - Bei FAILED: zeigt die Fehlermeldung an
+     * - Bei COMPLETED: zeigt Statistik mit Erfolg- und Fehlerzahl
+     * 
+     * @param importLog das ImportLog mit Status und Fehlernachricht
+     * @return formatierte Nachricht zur Anzeige in der Response
      */
     private String formatMessage(ImportLog importLog) {
         if (importLog.getStatus() == ImportLog.ImportStatus.FAILED) {
@@ -205,7 +256,14 @@ public class ImportController {
     }
 
     /**
-     * Validate if file is supported import format
+     * Validiert, ob eine Datei ein unterstütztes Import-Format hat.
+     * 
+     * Diese Methode prüft die Dateiendung gegen die Liste der unterstützten Formate.
+     * Gültige Formate sind: .xlsx (Excel 2007+), .xls (Excel 97-2003), .csv (Comma-separated values).
+     * Die Prüfung ist case-insensitive.
+     * 
+     * @param filename der Dateiname (mit oder ohne Pfad) zum Prüfen. Kann null sein.
+     * @return true wenn die Dateiendung unterstützt ist, false sonst (auch bei null-Eingabe)
      */
     private boolean isSupportedImportFile(String filename) {
         if (filename == null) {
